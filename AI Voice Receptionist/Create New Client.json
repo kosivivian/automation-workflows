@@ -1,0 +1,141 @@
+{
+  "name": "Create New Client",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "email"
+            },
+            {
+              "name": "full_name"
+            },
+            {
+              "name": "phone_number"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        -16
+      ],
+      "id": "84d3c72d-8469-4a51-b32c-c76db5c5c860",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1lz7-wZNk6835nAz9A9-SLvPQYppLvV0eNqEfIDPc_D8",
+          "mode": "list",
+          "cachedResultName": "Med Spa CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lz7-wZNk6835nAz9A9-SLvPQYppLvV0eNqEfIDPc_D8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Clients",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lz7-wZNk6835nAz9A9-SLvPQYppLvV0eNqEfIDPc_D8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.email }}",
+            "Full Name": "={{ $json.full_name }}",
+            "Phone Number": "={{ $json.phone_number }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -32,
+        -16
+      ],
+      "id": "a1b75908-65a1-4317-afa9-fc11eb31cc1f",
+      "name": "Create client record",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hn7Tqjp2EE8xkvxJ",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "email": "emily@gmail.com",
+          "full_name": "emily emily",
+          "phone_number": "9049913578"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Create client record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4fb9d2bf-5bd2-4c21-a851-99e35e44b9bb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4a75850507e049b24528b55107bd941db041336d998efa3ff42ec16c77e0bd1b"
+  },
+  "nodeGroups": [],
+  "id": "gP5oicoCYdr3ddTl",
+  "tags": []
+}

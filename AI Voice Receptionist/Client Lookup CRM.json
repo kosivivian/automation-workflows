@@ -1,0 +1,352 @@
+{
+  "name": "Client Lookup CRM",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "email"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -176,
+        -48
+      ],
+      "id": "aca10d0a-9c30-40e1-8e33-5158a851c1e5",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "eb9e6526-398a-4d8e-9315-fe7e992d0c1e",
+              "leftValue": "={{ $json.Email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        240,
+        -48
+      ],
+      "id": "4d80d3c8-facf-4e09-90e9-70fdd90b450a",
+      "name": "Exists"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1lz7-wZNk6835nAz9A9-SLvPQYppLvV0eNqEfIDPc_D8",
+          "mode": "list",
+          "cachedResultName": "Med Spa CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lz7-wZNk6835nAz9A9-SLvPQYppLvV0eNqEfIDPc_D8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Clients",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lz7-wZNk6835nAz9A9-SLvPQYppLvV0eNqEfIDPc_D8/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        32,
+        -48
+      ],
+      "id": "bf93bbd0-7e6e-45ce-9d15-b15daac0e697",
+      "name": "Lookup",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hn7Tqjp2EE8xkvxJ",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1lz7-wZNk6835nAz9A9-SLvPQYppLvV0eNqEfIDPc_D8",
+          "mode": "list",
+          "cachedResultName": "Med Spa CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lz7-wZNk6835nAz9A9-SLvPQYppLvV0eNqEfIDPc_D8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 89769278,
+          "mode": "list",
+          "cachedResultName": "Appointment Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lz7-wZNk6835nAz9A9-SLvPQYppLvV0eNqEfIDPc_D8/edit#gid=89769278"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.Email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        -144
+      ],
+      "id": "69ffcb73-1b26-44ed-ab89-6a02858b5c41",
+      "name": "Get Info (Appointment)",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hn7Tqjp2EE8xkvxJ",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "30fdc6d9-f7a3-44fa-b5fe-9f35f7460e1f",
+              "leftValue": "={{ $('Get Info (Appointment)').item }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        656,
+        -144
+      ],
+      "id": "12d3b0e5-38de-43e6-a20d-dd43064b86d8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cd3b6df7-3450-4211-8907-31a2bdbdbc49",
+              "name": "message",
+              "value": "The client exists in the CRM but has no previous appointments",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        816,
+        0
+      ],
+      "id": "549e4402-a4d5-4d45-9338-6cd1a2962ddc",
+      "name": "Send message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5fca3d29-9ad0-4320-82ee-0fa4f5cfd3bd",
+              "name": "message",
+              "value": "=Customer exists in the CRM and has the appointment below:\n\nAppointment Type: {{ $json['Appointment Type'] }}\nDate: {{ $json.Date }}\nNotes: {{ $json.Notes }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        864,
+        -144
+      ],
+      "id": "0e1f9b69-4d29-429e-b2fd-104d22e1db1d",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "38530506-ac52-4ec5-9326-b1dc4f17d078",
+              "name": "message",
+              "value": "This is a new client, doesn't exist in CRM",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        32
+      ],
+      "id": "e05cb906-f071-43fc-ac77-cbc23a1672da",
+      "name": "send message"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "email": "kossydidian77@gmail.com"
+        }
+      }
+    ],
+    "Lookup": [
+      {
+        "json": {
+          "row_number": 4,
+          "Email": "john@gmail.com",
+          "Full Name": "john john",
+          "Phone Number": 9049913578
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Lookup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exists": {
+      "main": [
+        [
+          {
+            "node": "Get Info (Appointment)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup": {
+      "main": [
+        [
+          {
+            "node": "Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Info (Appointment)": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c8795fbf-6ab5-4af3-afa0-5db247c38dd3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4a75850507e049b24528b55107bd941db041336d998efa3ff42ec16c77e0bd1b"
+  },
+  "nodeGroups": [],
+  "id": "b2ZCe4fb7VVqGjvt",
+  "tags": []
+}

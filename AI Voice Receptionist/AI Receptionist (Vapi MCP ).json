@@ -1,0 +1,501 @@
+{
+  "name": "AI Receptionist (Vapi MCP )",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "19a664fb-4a53-4fa2-b384-c8c01ac15b1f"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        -128
+      ],
+      "id": "6ac2d415-02f7-45b2-a8d7-b43c05c1750e",
+      "name": "MCP Server Trigger",
+      "webhookId": "19a664fb-4a53-4fa2-b384-c8c01ac15b1f"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to lookup up client's email in the CRM",
+        "workflowId": {
+          "__rl": true,
+          "value": "b2ZCe4fb7VVqGjvt",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/b2ZCe4fb7VVqGjvt",
+          "cachedResultName": "Client Lookup CRM"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "email"
+          ],
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        64
+      ],
+      "id": "c02fdbfd-b6ff-4032-ac5e-8f29dd56421d",
+      "name": "Call 'Client Lookup CRM'"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to add a new client to CRM",
+        "workflowId": {
+          "__rl": true,
+          "value": "gP5oicoCYdr3ddTl",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/gP5oicoCYdr3ddTl",
+          "cachedResultName": "Create New Client"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email', ``, 'string') }}",
+            "full_name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('full_name', ``, 'string') }}",
+            "phone_number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('phone_number', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "full_name",
+              "displayName": "full_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "phone_number",
+              "displayName": "phone_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -16,
+        80
+      ],
+      "id": "e025393d-dd19-4a98-b066-5a814fa84ad8",
+      "name": "Call 'Create New Client'"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to lookup an appointment",
+        "workflowId": {
+          "__rl": true,
+          "value": "8eGRQuDJIzCDAnjJ",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/8eGRQuDJIzCDAnjJ",
+          "cachedResultName": "Lookup Appointment"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "after_time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('after_time', ``, 'string') }}",
+            "before_time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('before_time', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "after_time",
+              "displayName": "after_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "before_time",
+              "displayName": "before_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        192,
+        80
+      ],
+      "id": "25b9a9c0-41c2-4c8e-b68a-136d390f7e44",
+      "name": "Call 'Lookup Appointment'"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to book an appointment",
+        "workflowId": {
+          "__rl": true,
+          "value": "RAV4c6WAckcde4HZ",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/RAV4c6WAckcde4HZ",
+          "cachedResultName": "Book Appointment"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('email', ``, 'string') }}",
+            "start_time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('start_time', ``, 'string') }}",
+            "end_time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('end_time', ``, 'string') }}",
+            "event_summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('event_summary', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "event_summary",
+              "displayName": "event_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "end_time",
+              "displayName": "end_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        64
+      ],
+      "id": "a56d85df-9a3c-4f57-a651-d9d11cafbebb",
+      "name": "Call 'Book Appointment'"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to delete an appointment",
+        "workflowId": {
+          "__rl": true,
+          "value": "OwzHLW0OmRJHvaXe",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/OwzHLW0OmRJHvaXe",
+          "cachedResultName": "Delete Appointment"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('event_id', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "event_id"
+          ],
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        80
+      ],
+      "id": "8146e081-7a86-470a-b9dd-39aa7e83494e",
+      "name": "Call 'Delete Appointment'"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to update a client's appointment",
+        "workflowId": {
+          "__rl": true,
+          "value": "T253s90UIWVH0QFW",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/T253s90UIWVH0QFW",
+          "cachedResultName": "Update Appointment"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "start_time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('start_time', ``, 'string') }}",
+            "end_time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('end_time', ``, 'string') }}",
+            "event_id": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('event_id', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "start_time",
+              "displayName": "start_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "end_time",
+              "displayName": "end_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        32
+      ],
+      "id": "2ed3ae9a-4f41-47e2-a43d-51423c624336",
+      "name": "Call 'Update Appointment'"
+    },
+    {
+      "parameters": {
+        "description": "Call this tool to check availability",
+        "workflowId": {
+          "__rl": true,
+          "value": "SBsn7XsLn7b87pRt",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/SBsn7XsLn7b87pRt",
+          "cachedResultName": "Check availability"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "after_time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('after_time', ``, 'string') }}",
+            "before_time": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('before_time', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "after_time",
+              "displayName": "after_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "before_time",
+              "displayName": "before_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        80,
+        176
+      ],
+      "id": "6c45251d-84c4-4e4d-9c98-cbedf4c1dc8f",
+      "name": "Call 'Check availability'"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Call 'Client Lookup CRM'": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Create New Client'": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Lookup Appointment'": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Book Appointment'": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Delete Appointment'": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Update Appointment'": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'Check availability'": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "57d376ec-05b2-4467-978c-3c0365e29da6",
+  "meta": {
+    "instanceId": "4a75850507e049b24528b55107bd941db041336d998efa3ff42ec16c77e0bd1b"
+  },
+  "nodeGroups": [],
+  "id": "eU6vuexs8heww2PS",
+  "tags": []
+}
