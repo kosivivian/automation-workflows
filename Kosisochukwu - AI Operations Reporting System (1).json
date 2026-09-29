@@ -1,0 +1,1917 @@
+{
+  "name": "Kosisochukwu - AI Operations Reporting System",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -288,
+        0
+      ],
+      "id": "f9fef41e-d691-45e0-beb5-35f8b05e64e5",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "153Cvbp30zyOXsLnZVU-5-mGe4eK-8utWxtwbRYuYH4s",
+          "mode": "list",
+          "cachedResultName": "Week 2 Sales Source Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/153Cvbp30zyOXsLnZVU-5-mGe4eK-8utWxtwbRYuYH4s/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/153Cvbp30zyOXsLnZVU-5-mGe4eK-8utWxtwbRYuYH4s/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "91fa6d7a-aa8b-4715-bbd8-bcc5615d51b2",
+      "name": "Get row(s) in sheet",
+      "retryOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fGHL4TNtj0N7RmJ6",
+          "name": "Google Sheets account 9"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://week2-people-ops-api.vercel.app/api/people-ops",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -64,
+        224
+      ],
+      "id": "bf4dcaf5-4e4c-4691-a2ea-c36dfebd20f0",
+      "name": "get data from people ops",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "authentication": "airtableOAuth2Api",
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appXzl2xMnRZdy35j",
+          "mode": "list",
+          "cachedResultName": "Koya AI Academy",
+          "cachedResultUrl": "https://airtable.com/appXzl2xMnRZdy35j"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblm4DIwiP7n41EUX",
+          "mode": "list",
+          "cachedResultName": "Week 2 Project Delivery Source",
+          "cachedResultUrl": "https://airtable.com/appXzl2xMnRZdy35j/tblm4DIwiP7n41EUX"
+        },
+        "options": {},
+        "sort": {
+          "property": []
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        -176
+      ],
+      "id": "aa687cc3-de79-4e9d-aa8f-ceca78c9f92c",
+      "name": "get project del info",
+      "retryOnFail": true,
+      "credentials": {
+        "airtableOAuth2Api": {
+          "id": "AEIflx2BISK0TxOe",
+          "name": "Airtable account 11"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "records",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        96,
+        224
+      ],
+      "id": "5fff10c1-30e6-454f-b1ff-10ebbee59a51",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        656,
+        -16
+      ],
+      "id": "620a41cc-1cb9-4151-a251-e8b14e261772",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "99c899ec-8b8d-4862-8a53-0c2dc6337fa6",
+              "name": "source",
+              "value": "sales_sheet",
+              "type": "string"
+            },
+            {
+              "id": "130c4ee7-7502-4e9f-a54f-e66c9fb7cfc4",
+              "name": "department",
+              "value": "sales",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        400,
+        0
+      ],
+      "id": "a1cb2875-9ce2-478f-87e9-7101b2771914",
+      "name": "set fields sales"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "996859a5-7c42-4eaa-9c77-3e275af3ff69",
+              "name": "source",
+              "value": "people_ops_api",
+              "type": "string"
+            },
+            {
+              "id": "d7032832-f1cf-45e7-a159-357b465ed007",
+              "name": "department",
+              "value": "people_ops",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        240,
+        224
+      ],
+      "id": "24a21e41-67f1-4016-92f4-a2a34399b154",
+      "name": "set fields people"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d5d89976-8204-477d-b1d7-f070f7287585",
+              "name": "source",
+              "value": "project_delivery_base",
+              "type": "string"
+            },
+            {
+              "id": "1ea13c21-3d94-425b-89fe-53ff535a817a",
+              "name": "department",
+              "value": "project_delivery",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        400,
+        -176
+      ],
+      "id": "63a7f9f4-5e40-4e13-bf92-03cb22b842db",
+      "name": "set fields project"
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\n\nconst FIELD_MAPPINGS = {\n  sales_sheet: {\n    department: 'sales',\n    fields: {\n      status:            { keys: ['Status', 'status'],                     type: 'string', required: true },\n      amount:            { keys: ['deal_amount'],                     type: 'number', required: true },\n      lead_source:       { keys: ['Lead Source', 'lead_source'],           type: 'string', required: false },\n      marketing_spend:   { keys: ['Marketing Spend', 'marketing_spend'],   type: 'number', required: false },\n      created_date:      { keys: ['Created Date', 'created_date', 'date'],         type: 'date',   required: true },\n    }\n  },\n  project_delivery_base: {\n    department: 'project_delivery',\n    fields: {\n      status:            { keys: ['Status', 'status'],                     type: 'string', required: true },\n      project_name: { keys: ['project_name', 'Project_name'],\n                    type: 'string', required: true},\n      project_id: { keys: ['project_id', 'Project_id'],\n                    type: 'string', required: true},\n      owner: { keys: ['owner', 'Owner'],\n                    type: 'string', required: true},\n      kickoff_date: { keys: ['kickoff_date', 'Kickoff_date'], type: 'date', required: true},\n      team:              { keys: ['Team', 'team'],                         type: 'string', required: false },\n      due_date:          { keys: ['Due Date', 'due_date'],                 type: 'date',   required: true },\n      completed_date:    { keys: ['Completed Date', 'completed_date'],     type: 'date',   required: false },\n      actual_cost:       { keys: ['Actual Cost', 'actual_cost'],           type: 'number', required: false },\n      budgeted_cost:     { keys: ['Budgeted Cost', 'budgeted_cost'],       type: 'number', required: false },\n    }\n  },\n  people_ops_api: {\n    department: 'people_ops',\n    fields: {\n      employee_id:      { keys: ['employee_id'],                       type: 'string', required: true },\n      department_name:      { keys: ['department'],                       type: 'string', required: true },\n      role:      { keys: ['role', 'Role'],                       type: 'string', required: true },\n      application_date:     { keys: ['application_date'],                 type: 'date',   required: true },\n      offer_accepted_date:  { keys: ['offer_accepted_date'],               type: 'date',   required: false },\n      start_date:           { keys: ['start_date'],                       type: 'date',   required: false },\n      exit_date:            { keys: ['exit_date'],                        type: 'date',   required: false },\n      employment_status:    { keys: ['status', 'employment_status'],      type: 'string', required: false },\n    }\n  }\n};\n\nfunction isBlank(v) {\n  return v === null || v === undefined || (typeof v === 'string' && v.trim() === '');\n}\n\nfunction isInvalidDate(v) {\n  return !isBlank(v) && isNaN(Date.parse(v));\n}\n\n// Pulls raw values into the canonical shape using the config's key list\nfunction mapFields(source, raw) {\n  const config = FIELD_MAPPINGS[source];\n  if (!config) return { data: {}, department: 'unknown' };\n\n  const data = {};\n  for (const [canonicalField, meta] of Object.entries(config.fields)) {\n    const rawValue = meta.keys.map(k => raw[k]).find(v => v !== undefined);\n    data[canonicalField] = rawValue ?? null;\n  }\n  return { data, department: config.department };\n}\n\n// Generic: loops over every field defined in the config, no per-field hardcoding\nfunction getQualityFlags(source, data) {\n  const config = FIELD_MAPPINGS[source];\n  if (!config) return ['unknown_source'];\n\n  const flags = [];\n  for (const [field, meta] of Object.entries(config.fields)) {\n    const value = data[field];\n\n    if (isBlank(value) && meta.required) {\n      flags.push(`missing_${field}`);\n    }\n    if (meta.type === 'date' && isInvalidDate(value)) {\n      flags.push(`invalid_${field}`);\n    }\n  }\n  return flags;\n}\n\nconst departmentBySource = {\n  sales_sheet: 'sales',\n  project_delivery_base: 'project_delivery',\n  people_ops_api: 'people_ops',\n};\n\nconst normalized = items.map((item) => {\n  const raw = item.json;\n  const source = raw.source;\n\n  const { data } = mapFields(source, raw);\n  const quality_flags = getQualityFlags(source, data);\n\n  const record_hash = crypto\n    .createHash('sha256')\n    .update(JSON.stringify(data))\n    .digest('hex');\n\n  const source_record_id =\n    raw.source_record_id || raw.id || raw.airtable_record_id ||\n    raw.recordId || raw.record_id || raw.employee_id || raw.lead_id || null;\n\n  // Flag missing IDs explicitly — these can't be deduped against future syncs\n  if (source_record_id === null) {\n    quality_flags.push('missing_source_record_id');\n  }\n\n  return {\n    json: {\n      source,\n      department: departmentBySource[source] || 'unknown',\n      source_record_id,\n      record_hash,\n      synced_at: new Date().toISOString(),\n      quality_flags,\n      data,\n    },\n  };\n});\n\nreturn normalized;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ],
+      "id": "05ecbe3e-dcdc-4671-8cdb-7d264f8b5cb8",
+      "name": "normalize data"
+    },
+    {
+      "parameters": {
+        "content": "## Data Extraction",
+        "height": 672,
+        "width": 1124
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -352,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "e175d3ff-8b51-4a17-8c92-8c294b950e82",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Data Cleaning & Normalization | Duplicate Detection & Storage\n",
+        "height": 672,
+        "width": 2324,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        816,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "285311ab-ba10-444b-844c-36e00b2a4735",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((item) => {\n  const raw = item.json;\n\n  const flattened = raw.fields ? { ...raw.fields } : { ...raw };\n\n  // Always preserve Airtable's own record id and creation timestamp,\n  // even when project_id already exists — you want both available downstream.\n  if (raw.id) flattened.airtable_record_id = raw.id;\n  if (raw.createdTime) flattened.airtable_created_time = raw.createdTime;\n\n  flattened.source = 'project_delivery_base';\n\n  return { json: flattened };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -176
+      ],
+      "id": "730af402-463c-4d7d-819b-5a7652610b4c",
+      "name": "flatten"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Cleaning / standardization node\n// Runs AFTER the normalize node — receives items already in canonical shape:\n// { source, department, source_record_id, record_hash, synced_at, quality_flags, data }\n\nfunction cleanString(value) {\n  if (value === null || value === undefined) return null;\n  const trimmed = String(value).trim();\n  if (trimmed === '') return null;\n  return trimmed;\n}\n\n// Standardizes casing for controlled-vocabulary fields (status, department names)\n// so \"closed won\", \"Closed Won \", \"CLOSED WON\" all collapse to one canonical form.\nfunction standardizeEnum(value, mapping) {\n  const cleaned = cleanString(value);\n  if (cleaned === null) return null;\n  const key = cleaned.toLowerCase();\n  return mapping[key] || cleaned; // fall back to cleaned original if no mapping matches\n}\n\nconst STATUS_MAP = {\n  'closed won': 'Closed Won',\n  'closed lost': 'Closed Lost',\n  'qualified': 'Qualified',\n  'proposal sent': 'Proposal Sent',\n  'in progress': 'In Progress',\n  'blocked': 'Blocked',\n  'completed': 'Completed',\n  'not started': 'Not Started',\n};\n\n// Parses a variety of date formats into a strict ISO 8601 date string (YYYY-MM-DD).\n// Returns null (not a throw) on anything unparseable — the quality_flags system\n// already caught invalid dates upstream; this just avoids silently passing through\n// a Date object or inconsistent string format into Supabase.\nfunction toIsoDate(value) {\n  if (value === null || value === undefined || value === '') return null;\n\n  const parsed = new Date(value);\n  if (isNaN(parsed.getTime())) return null;\n\n  return parsed.toISOString().split('T')[0]; // YYYY-MM-DD, drop time component\n}\n\n// Strips currency symbols, commas, and whitespace, then parses to a float.\n// Returns null (not NaN) on failure — never let NaN leak downstream into metrics/Claude.\nfunction toCleanNumber(value) {\n  if (value === null || value === undefined || value === '') return null;\n  if (typeof value === 'number') return isNaN(value) ? null : value;\n\n  const cleaned = String(value).replace(/[$,€£\\s]/g, '').trim();\n  if (cleaned === '') return null;\n\n  const parsed = parseFloat(cleaned);\n  return isNaN(parsed) ? null : parsed;\n}\n\n// Declares, per department, which cleaning function applies to which field —\n// same config-driven pattern as the normalize node, so adding a department\n// later means adding a config entry, not new cleaning logic.\nconst CLEANING_RULES = {\n  sales: {\n    status: (v) => standardizeEnum(v, STATUS_MAP),\n    amount: toCleanNumber,\n    marketing_spend: toCleanNumber,\n    lead_source: cleanString,\n    created_date: toIsoDate,\n    close_date: toIsoDate,\n  },\n  project_delivery: {\n    status: (v) => standardizeEnum(v, STATUS_MAP),\n    team: cleanString,\n    owner: cleanString,\n    project_name: cleanString,\n    due_date: toIsoDate,\n    completed_date: toIsoDate,\n    kickoff_date: toIsoDate,\n    actual_cost: toCleanNumber,\n    budgeted_cost: toCleanNumber,\n  },\n  people_ops: {\n    department_name: cleanString,\n    employment_status: (v) => standardizeEnum(v, STATUS_MAP),\n    application_date: toIsoDate,\n    offer_accepted_date: toIsoDate,\n    start_date: toIsoDate,\n    exit_date: toIsoDate,\n  },\n};\n\nconst cleaned = items.map((item) => {\n  const record = item.json;\n  const rules = CLEANING_RULES[record.department] || {};\n\n  const cleanedData = { ...record.data };\n  for (const [field, cleanFn] of Object.entries(rules)) {\n    if (field in cleanedData) {\n      cleanedData[field] = cleanFn(cleanedData[field]);\n    }\n  }\n\n  return {\n    json: {\n      ...record,\n      data: cleanedData,\n      cleaned_at: new Date().toISOString(),\n    },\n  };\n});\n\nreturn cleaned;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2496,
+        16
+      ],
+      "id": "7a0d519b-4ceb-4908-86a4-d1162c19a466",
+      "name": "clean data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6c6354a5-81d7-4bfb-bace-02734169b898",
+              "leftValue": "={{ $json.source_record_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "8268f59b-5b24-4071-a526-5dc7c0a05222",
+      "name": "is unique_identifier present?",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Grab the original normalized items from BEFORE the Supabase lookup —\n// not from the lookup node's output, so nothing depends on what it returned.\nconst originalItems = $('is unique_identifier present?').all(); \n// ^ adjust to whatever your split/IF node is actually named\n\n// The bulk lookup results — whatever rows DID exist in Supabase\nconst existingRecords = items; // output of the \"Get Many Rows\" node feeding into this Code node\n\n// Build a lookup map: source_record_id -> existing row's stored hash\nconst existingMap = new Map();\nfor (const row of existingRecords) {\n  existingMap.set(row.json.source_record_id, row.json.record_hash);\n}\n\nconst results = originalItems.map((item) => {\n  const record = item.json;\n  const existingHash = existingMap.get(record.source_record_id);\n\n  let action;\n  if (existingHash === undefined) {\n    action = 'insert'; // no match found — brand new record\n  } else if (existingHash === record.record_hash) {\n    action = 'duplicate'; // same ID, same hash — true duplicate, skip\n  } else {\n    action = 'update'; // same ID, different hash — something changed\n  }\n\n  return {\n    json: {\n      ...record,\n      action,\n    },\n  };\n});\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1888,
+        -64
+      ],
+      "id": "ff73702e-54f0-4b2a-8ef0-b0f777a86db2",
+      "name": "prevent data loss"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { ids: items.map(i => i.json.source_record_id) } }]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1408,
+        -16
+      ],
+      "id": "c13ef0fd-4426-404e-859d-af975fd8ddd6",
+      "name": "turn individual items to one list"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "05cffbc0-16a8-40ca-8695-37283c5b1965",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "insert",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "81648c1a-0cb9-4e37-8c38-9649705e30e6",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "upsert",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2128,
+        -64
+      ],
+      "id": "e983f001-7c67-4033-95e3-93e82ecdbd35",
+      "name": "not duplicate?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        208
+      ],
+      "id": "66e2672a-c33d-4e5a-aec7-ac91f72ad2fc",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "content": "## Metrics & AI Insights\n",
+        "height": 928,
+        "width": 2516,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3152,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "c7465804-e855-4004-9650-89a39d81d10e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://lmbqaneywsoyknxhwerj.supabase.co/rest/v1/records?on_conflict=source,source_record_id",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtYnFhbmV5d3NveWtueGh3ZXJqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODI5MTYzNSwiZXhwIjoyMTAzODY3NjM1fQ.ABNvIWuvCbr5sZG5gpEFvchXUEfkXdPZYRKgcReQ3t8"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtYnFhbmV5d3NveWtueGh3ZXJqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODI5MTYzNSwiZXhwIjoyMTAzODY3NjM1fQ.ABNvIWuvCbr5sZG5gpEFvchXUEfkXdPZYRKgcReQ3t8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.records }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        2976,
+        32
+      ],
+      "id": "9428552c-827d-46f7-8b11-89c675587710",
+      "name": "upsert in supabase"
+    },
+    {
+      "parameters": {
+        "jsCode": "const records = items\n  .map(item => ({\n    source: item.json.source,\n    department: item.json.department,\n    source_record_id: item.json.source_record_id,\n    record_hash: item.json.record_hash,\n    quality_flags: item.json.quality_flags,\n    data: item.json.data,\n    synced_at: item.json.synced_at,\n  }));\n\nreturn [{ json: { records } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2768,
+        16
+      ],
+      "id": "d00eadab-6077-423a-8eda-6b693236d339",
+      "name": "group items into array"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3520,
+        32
+      ],
+      "id": "19d5a2c9-3719-481c-b799-feaa0c6c56af",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const period = $('Loop Over Items').item.json;\nconst periodStart = new Date(period.start_date);\nconst periodEnd = new Date(period.end_date);\nperiodEnd.setHours(23, 59, 59, 999);\n\n//  compute the immediately-preceding period of the same length \nconst periodLengthMs = periodEnd.getTime() - periodStart.getTime();\nconst prevPeriodEnd = new Date(periodStart.getTime() - 1); // \nconst prevPeriodStart = new Date(prevPeriodEnd.getTime() - periodLengthMs);\n\nfunction inRange(dateStr, rangeStart, rangeEnd) {\n  if (!dateStr) return false;\n  const d = new Date(dateStr);\n  if (isNaN(d.getTime())) return false;\n  return d >= rangeStart && d <= rangeEnd;\n}\n\nconst allRecords = items.map(i => i.json);\nconst sales = allRecords.filter(r => r.department === 'sales');\nconst projects = allRecords.filter(r => r.department === 'project_delivery');\nconst peopleOps = allRecords.filter(r => r.department === 'people_ops');\n\n// wrap entire existing calculation block in a function\nfunction calculateMetrics(rangeStart, rangeEnd) {\n  const inPeriod = (dateStr) => inRange(dateStr, rangeStart, rangeEnd);\n\n  // SALES \n  const salesInPeriod = sales.filter(r => inPeriod(r.data.created_date));\n  const closedWon = salesInPeriod.filter(r => r.data.status === 'Closed Won');\n  const closedLost = salesInPeriod.filter(r => r.data.status === 'Closed Lost');\n  const openDeals = salesInPeriod.filter(r => ['Qualified', 'Proposal Sent'].includes(r.data.status));\n\n  const totalLeads = salesInPeriod.length;\n  const revenueWon = closedWon.reduce((sum, r) => sum + (r.data.amount || 0), 0);\n  const pipelineValue = openDeals.reduce((sum, r) => sum + (r.data.amount || 0), 0);\n  const wonPlusLost = closedWon.length + closedLost.length;\n  const winRate = wonPlusLost > 0 ? closedWon.length / wonPlusLost : null;\n\n  const monthlySpendMap = {};\n  const monthlySpendConflicts = new Set();\n  for (const r of salesInPeriod) {\n    const dateStr = r.data.created_date;\n    if (!dateStr) continue;\n    const d = new Date(dateStr);\n    if (isNaN(d.getTime())) continue;\n    const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;\n    const spend = r.data.marketing_spend;\n    if (spend === null || spend === undefined) continue;\n    if (monthKey in monthlySpendMap) {\n      if (monthlySpendMap[monthKey] !== spend) monthlySpendConflicts.add(monthKey);\n    } else {\n      monthlySpendMap[monthKey] = spend;\n    }\n  }\n  const marketingSpend = Object.values(monthlySpendMap).reduce((sum, v) => sum + v, 0);\n  const costPerLead = totalLeads > 0 ? marketingSpend / totalLeads : null;\n\n  const revenueByLeadSource = {};\n  for (const r of closedWon) {\n    const src = r.data.lead_source || 'Unknown';\n    revenueByLeadSource[src] = (revenueByLeadSource[src] || 0) + (r.data.amount || 0);\n  }\n\n  const salesMetrics = {\n    total_leads: totalLeads, closed_won: closedWon.length, closed_lost: closedLost.length,\n    pipeline_value: pipelineValue, revenue_won: revenueWon, win_rate: winRate,\n    marketing_spend: marketingSpend, cost_per_lead: costPerLead,\n    revenue_by_lead_source: revenueByLeadSource,\n  };\n\n  //  PROJECT DELIVERY \nconst activeProjects = projects.filter(r => {\n  const status = r.data.status;\n  if (!['In Progress'].includes(status)) return false;\n\n  const kickoff = r.data.kickoff_date ? new Date(r.data.kickoff_date) : null;\n  // Project must have actually started by the end of the period —\n  // this is the check that was missing entirely before.\n  if (!kickoff || kickoff > rangeEnd) return false;\n\n  const completed = r.data.completed_date ? new Date(r.data.completed_date) : null;\n  // Still \"active during period\" if not yet completed, or completed on/after period start\n  return !completed || completed >= rangeStart;\n});\n\nconst completedInPeriod = projects.filter(r => inPeriod(r.data.completed_date));\n\n// Blocked count now scoped to the period, per your business rule:\n// a blocked project only counts if it KICKED OFF within the selected range.\nconst blockedProjects = projects.filter(r =>\n  r.data.status === 'Blocked' && inPeriod(r.data.kickoff_date)\n);\n  const completedWithDueDates = completedInPeriod.filter(r => r.data.due_date && r.data.completed_date);\n  const onTimeCompleted = completedWithDueDates.filter(r => new Date(r.data.completed_date) <= new Date(r.data.due_date));\n  const onTimeRate = completedWithDueDates.length > 0 ? onTimeCompleted.length / completedWithDueDates.length : null;\n  const lateCompleted = completedWithDueDates.filter(r => new Date(r.data.completed_date) > new Date(r.data.due_date));\n  const avgDelay = lateCompleted.length > 0\n    ? lateCompleted.reduce((sum, r) => sum + (new Date(r.data.completed_date) - new Date(r.data.due_date)) / 86400000, 0) / lateCompleted.length\n    : null;\n  const projectsWithCosts = completedInPeriod.filter(r => r.data.actual_cost !== null && r.data.budgeted_cost !== null);\n  const overBudgetProjects = projectsWithCosts.filter(r => r.data.actual_cost > r.data.budgeted_cost);\n  const avgBudgetVariance = projectsWithCosts.length > 0\n    ? projectsWithCosts.reduce((sum, r) => sum + (r.data.actual_cost - r.data.budgeted_cost), 0) / projectsWithCosts.length\n    : null;\n  const deliveryLoadByTeam = {};\n  for (const r of [...activeProjects, ...completedInPeriod]) {\n    const team = r.data.team || 'Unassigned';\n    deliveryLoadByTeam[team] = (deliveryLoadByTeam[team] || 0) + 1;\n  }\n\n  const projectMetrics = {\n    active_projects: activeProjects.length, completed_projects: completedInPeriod.length,\n    blocked_projects: blockedProjects.length, on_time_completion_rate: onTimeRate,\n    average_delay_days: avgDelay, over_budget_projects: overBudgetProjects.length,\n    average_budget_variance: avgBudgetVariance, delivery_load_by_team: deliveryLoadByTeam,\n  };\n\n  // PEOPLE OPS \n  const applications = peopleOps.filter(r => inPeriod(r.data.application_date));\n  const offersAccepted = peopleOps.filter(r => inPeriod(r.data.offer_accepted_date));\n  const newHires = peopleOps.filter(r => inPeriod(r.data.start_date));\n  const exits = peopleOps.filter(r => inPeriod(r.data.exit_date));\n\n  const activeHeadcount = peopleOps.filter(r => {\n    const start = r.data.start_date ? new Date(r.data.start_date) : null;\n    const exit = r.data.exit_date ? new Date(r.data.exit_date) : null;\n    if (!start || start > rangeEnd) return false;\n    if (exit && exit <= rangeEnd) return false;\n    return true;\n  }).length;\n\n  const activeHeadcountAtStart = peopleOps.filter(r => {\n    const start = r.data.start_date ? new Date(r.data.start_date) : null;\n    const exit = r.data.exit_date ? new Date(r.data.exit_date) : null;\n    if (!start || start >= rangeStart) return false;\n    if (exit && exit < rangeStart) return false;\n    return true;\n  }).length;\n\n  const attritionRate = activeHeadcountAtStart > 0 ? exits.length / activeHeadcountAtStart : null;\n\n  const hiresWithBothDates = newHires.filter(r => r.data.application_date && r.data.start_date);\n  const timeToHire = hiresWithBothDates.length > 0\n    ? hiresWithBothDates.reduce((sum, r) => sum + (new Date(r.data.start_date) - new Date(r.data.application_date)) / 86400000, 0) / hiresWithBothDates.length\n    : null;\n\n  const offersWithBothDates = offersAccepted.filter(r => r.data.application_date && r.data.offer_accepted_date);\n  const offerAcceptanceTime = offersWithBothDates.length > 0\n    ? offersWithBothDates.reduce((sum, r) => sum + (new Date(r.data.offer_accepted_date) - new Date(r.data.application_date)) / 86400000, 0) / offersWithBothDates.length\n    : null;\n\n  const headcountByDept = {};\n  for (const r of peopleOps) {\n    const start = r.data.start_date ? new Date(r.data.start_date) : null;\n    const exit = r.data.exit_date ? new Date(r.data.exit_date) : null;\n    const isActiveAtEnd = start && start <= rangeEnd && (!exit || exit > rangeEnd);\n    if (isActiveAtEnd) {\n      const dept = r.data.department || 'Unassigned';\n      headcountByDept[dept] = (headcountByDept[dept] || 0) + 1;\n    }\n  }\n\n  const peopleOpsMetrics = {\n    applications: applications.length, offers_accepted: offersAccepted.length,\n    new_hires: newHires.length, exits: exits.length, active_headcount: activeHeadcount,\n    time_to_hire_days: timeToHire, offer_acceptance_time_days: offerAcceptanceTime,\n    attrition_rate: attritionRate, headcount_by_department: headcountByDept,\n  };\n\n  return { sales: salesMetrics, project_delivery: projectMetrics, people_ops: peopleOpsMetrics, monthlySpendConflicts };\n}\n\n// call it twice \nconst currentMetrics = calculateMetrics(periodStart, periodEnd);\nconst previousMetrics = calculateMetrics(prevPeriodStart, prevPeriodEnd);\n\n//DATA QUALITY SUMMARY\nconst salesInPeriod = sales.filter(r => inRange(r.data.created_date, periodStart, periodEnd));\nconst activeProjectsCheck = projects.filter(r => inRange(r.data.completed_date, periodStart, periodEnd) || ['In Progress','Blocked'].includes(r.data.status));\nconst applicationsCheck = peopleOps.filter(r => inRange(r.data.application_date, periodStart, periodEnd));\n\nconst flagCounts = {};\nfor (const r of allRecords) {\n  for (const flag of (r.quality_flags || [])) {\n    flagCounts[flag] = (flagCounts[flag] || 0) + 1;\n  }\n}\nconst departmentsWithNoRecords = [];\nif (currentMetrics.sales.total_leads === 0) departmentsWithNoRecords.push('sales');\nif (currentMetrics.project_delivery.active_projects === 0 && currentMetrics.project_delivery.completed_projects === 0) departmentsWithNoRecords.push('project_delivery');\nif (currentMetrics.people_ops.applications === 0 && currentMetrics.people_ops.new_hires === 0) departmentsWithNoRecords.push('people_ops');\n\nconst dataQualitySummary = {\n  flag_counts: {\n    ...flagCounts,\n    ...(currentMetrics.monthlySpendConflicts.size > 0 ? { inconsistent_marketing_spend_in_month: currentMetrics.monthlySpendConflicts.size } : {})\n  },\n  total_flagged_records: allRecords.filter(r => (r.quality_flags || []).length > 0).length,\n  departments_with_no_records: departmentsWithNoRecords,\n};\n\n// FINAL OUTPUT \nreturn [{\n  json: {\n    period_type: period.period_type,\n    start_date: period.start_date,\n    end_date: period.end_date,\n    metrics: {\n      sales: currentMetrics.sales,\n      project_delivery: currentMetrics.project_delivery,\n      people_ops: currentMetrics.people_ops,\n    },\n    previous_period: {\n      sales: previousMetrics.sales,\n      project_delivery: previousMetrics.project_delivery,\n      people_ops: previousMetrics.people_ops,\n    },\n    data_quality_summary: dataQualitySummary,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4032,
+        64
+      ],
+      "id": "dd17ba18-8a97-44c4-8b05-2d1d829d73a8",
+      "name": "calculate metrics"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Single source of truth for \"today\" — see prior note on testing vs production.\nconst REFERENCE_DATE = '2026-06-30'; // TESTING: matches KPI guide's fixed dataset anchor\n// const REFERENCE_DATE = null;      // PRODUCTION: switch to this for real \"today\"\n\nconst now = REFERENCE_DATE ? new Date(REFERENCE_DATE) : new Date();\n\nfunction toDateStr(d) {\n  return d.toISOString().split('T')[0];\n}\n\nconst periods = [];\n\n// Last 30 days\n{\n  const start = new Date(now);\n  start.setDate(start.getDate() - 30);\n  periods.push({ period_type: 'last_30', start_date: toDateStr(start), end_date: toDateStr(now) });\n}\n\n// Last 90 days\n{\n  const start = new Date(now);\n  start.setDate(start.getDate() - 90);\n  periods.push({ period_type: 'last_90', start_date: toDateStr(start), end_date: toDateStr(now) });\n}\n\n// Year to date\n{\n  const start = new Date(now.getFullYear(), 0, 1);\n  periods.push({ period_type: 'ytd', start_date: toDateStr(start), end_date: toDateStr(now) });\n}\n\nreturn periods.map(p => ({ json: p }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3280,
+        32
+      ],
+      "id": "bcd7fd1a-aac9-4a64-b742-6eeda41d119f",
+      "name": "define time periods"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "records",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3824,
+        48
+      ],
+      "id": "afc04fda-1f7a-42da-9463-b299ed8b80cb",
+      "name": "get data within time period",
+      "credentials": {
+        "supabaseApi": {
+          "id": "mTNliyxQ5tGHPQRT",
+          "name": "Supabase account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://lmbqaneywsoyknxhwerj.supabase.co/rest/v1/reports?on_conflict=period_type",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtYnFhbmV5d3NveWtueGh3ZXJqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODI5MTYzNSwiZXhwIjoyMTAzODY3NjM1fQ.ABNvIWuvCbr5sZG5gpEFvchXUEfkXdPZYRKgcReQ3t8"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtYnFhbmV5d3NveWtueGh3ZXJqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODI5MTYzNSwiZXhwIjoyMTAzODY3NjM1fQ.ABNvIWuvCbr5sZG5gpEFvchXUEfkXdPZYRKgcReQ3t8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "period_type",
+              "value": "={{ $json.period_type }}"
+            },
+            {
+              "name": "start_date",
+              "value": "={{ $json.start_date }}"
+            },
+            {
+              "name": "end_date",
+              "value": "={{ $json.end_date }}"
+            },
+            {
+              "name": "metrics",
+              "value": "={{ JSON.stringify($json.metrics) }}"
+            },
+            {
+              "name": "data_quality_summary",
+              "value": "={{ JSON.stringify($json.data_quality_summary) }}"
+            },
+            {
+              "name": "ai_executive_summary",
+              "value": "={{ $json.executive_summary }}"
+            },
+            {
+              "name": "ai_risks_anomalies",
+              "value": "={{ JSON.stringify($json.risks_or_anomalies) }}"
+            },
+            {
+              "name": "ai_recommended_actions",
+              "value": "={{ JSON.stringify($json.recommended_actions) }}"
+            },
+            {
+              "name": "ai_data_quality_notes",
+              "value": "={{ $json.data_quality_notes }}"
+            },
+            {
+              "name": "generated_at",
+              "value": "={{ new Date().toISOString() }}"
+            },
+            {
+              "name": "previous_period",
+              "value": "={{ JSON.stringify($json.previous_period ?? null) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        5424,
+        448
+      ],
+      "id": "4ce1bb65-4be7-4861-864c-5cc843780756",
+      "name": "upsert into reports"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "claude-haiku-4-5-20251001"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.prompt }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {
+          "system": "# Role\n\nYou are an operations analyst assistant for Koya Talent, a company with \nSales, Project Delivery, and People Ops teams. You analyze pre-calculated \nbusiness metrics and produce structured, executive-ready insights for a \nreporting dashboard.\n\n# Task\n\nYou will receive a JSON object containing calculated metrics for Sales, \nProject Delivery, and People Ops for a specific reporting period — and, \nwhen available, the equivalent prior period's metrics for comparison — \nalong with a data quality summary. Your job is to analyze this data and \nreturn a structured insight report a manager can act on.\n\nYou do NOT calculate metrics yourself. All numbers are already computed \nand correct — your job is interpretation, not arithmetic.\n\n# Analysis Focus\n\nUse these questions to guide what you look for in each section — they \nare not a checklist to answer one-by-one in the output, but the lens for \ndeciding what belongs in the executive summary, risks, and actions. Only \nraise a point if the data actually supports it; if a question can't be \nanswered from the given fields, do not guess.\n\n**Sales**\n- Which lead source(s) in `revenue_by_lead_source` produced the most \n  revenue, and how does that compare to the others?\n- If `previous_period.sales` is provided, compare `win_rate` against it \n  and state whether it improved, declined, or stayed roughly stable \n  (treat changes under ~2 percentage points as \"stable\"). If no prior \n  period is provided, do not speculate about direction — say the trend \n  cannot be assessed from a single period.\n- Compare `marketing_spend` against `pipeline_value` and `revenue_won` — \n  is spend translating into proportionate pipeline/revenue, or is \n  `cost_per_lead` high relative to what's being closed?\n- Check `data_quality_summary.flag_counts` for sales-relevant flags \n  (e.g. missing amount, missing lead source, missing status) that would \n  affect confidence in the sales numbers above.\n\n**Project Delivery**\n- Using `delivery_load_by_team`, note any team carrying a disproportionate \n  share of active + completed projects relative to the others.\n- If `previous_period.project_delivery` is provided, compare \n  `blocked_projects` against it to say whether blocked projects are \n  increasing, decreasing, or stable. Otherwise, only report the current \n  count without a trend claim.\n- Use `on_time_completion_rate`, `average_delay_days`, `over_budget_projects`, \n  and `average_budget_variance` to identify whether delivery is slipping \n  on time, cost, or both.\n- Of everything found in this section, identify the single issue most \n  worth addressing first, and make sure it appears among the recommended \n  actions — grounded in its specific numbers, not a general statement.\n\n**People Ops**\n- Compare `new_hires` and `applications`/`offers_accepted` against what a \n  reader would need to judge hiring pace — state the numbers plainly; do \n  not assert whether that volume is \"enough\" unless a target or baseline \n  is present in the data to compare against.\n- Use `headcount_by_department` alongside `exits` if department-level exit \n  data is present in the input; if exits are not broken down by department \n  in the provided fields, say that this breakdown isn't available rather \n  than guessing which department it affects.\n- If `previous_period.people_ops` is provided, compare `time_to_hire_days` \n  and state whether it's increasing, decreasing, or stable. Otherwise, do \n  not claim a direction.\n- Check `data_quality_summary` for People Ops-relevant flags (e.g. missing \n  application or start dates) that would reduce confidence in hiring or \n  attrition figures.\n\n# Rules\n\n1. **Never invent numbers, causes, or context not present in the input \n   data.** Every claim you make must be traceable to a specific field in \n   the provided metrics.\n2. **If a metric is `null` or missing, do not guess a value or explanation \n   for it.** State plainly that it could not be calculated due to missing \n   data, and reference the relevant data quality flag if one exists.\n3. **If there is genuinely nothing noteworthy in a section** (e.g. no \n   meaningful risks, or no useful recommendation), say so directly — \n   do not fabricate a risk or action just to fill the field. An empty or \n   near-empty array is a valid, correct answer.\n4. **Do not speculate about causes you cannot see in the data.** For \n   example, if win rate dropped, you may state that it dropped and by how \n   much, but do not guess *why* (e.g. \"likely due to a weaker sales team\") \n   unless a specific data point supports that claim.\n5. **Never claim a trend (increasing/decreasing/improving/declining) \n   without a `previous_period` value to compare against.** If no prior \n   period is provided for a given metric, explicitly say the trend cannot \n   be assessed from a single period rather than omitting the question \n   silently or guessing a direction.\n6. **Keep the executive summary factual and concise** — 2-4 sentences, no \n   more. Do not editorialize or use marketing language.\n7. **Ground every recommended action in a specific number.** A vague \n   action like \"improve sales performance\" is not acceptable; \"investigate \n   why 4 of 9 sales records are missing lead source data before next \n   period's revenue-by-source analysis\" is.\n8. **List every relevant data quality issue in `data_quality_notes`**, \n   including blank dates, invalid dates, missing status, missing amount \n   or cost, records skipped from a calculation, and any department with \n   no records for the selected period. If `data_quality_summary` shows no \n   issues, state clearly that no data quality issues were found for this \n   period — do not fabricate one to fill the field.\n9. Output valid JSON only, matching the exact schema below. No markdown \n   formatting, no prose outside the JSON structure, no explanation of your \n   reasoning process.\n\n# Output Schema\n\nReturn exactly this structure:\n\n{\n  \"executive_summary\": \"string\",\n  \"risks_or_anomalies\": [\n    { \"description\": \"string\", \"severity\": \"low\" | \"medium\" | \"high\", \"department\": \"sales\" | \"project_delivery\" | \"people_ops\" | \"general\" }\n  ],\n  \"recommended_actions\": [\n    { \"action\": \"string\", \"priority\": \"low\" | \"medium\" | \"high\", \"department\": \"sales\" | \"project_delivery\" | \"people_ops\" | \"general\" }\n  ],\n  \"data_quality_notes\": \"string\"\n}\n\nIf there are no meaningful risks or actions, return an empty array for \nthat field — not a placeholder entry.\n\n# Example\n\nGiven this input:\n\n{\n  \"metrics\": {\n    \"sales\": {\n      \"total_leads\": 42,\n      \"closed_won\": 9,\n      \"closed_lost\": 15,\n      \"win_rate\": 0.375,\n      \"pipeline_value\": 84000,\n      \"cost_per_lead\": 118,\n      \"revenue_by_lead_source\": { \"Referral\": 32000, \"Cold Outreach\": 4000 }\n    }\n  },\n  \"previous_period\": {\n    \"sales\": { \"win_rate\": 0.41 }\n  },\n  \"data_quality_summary\": {\n    \"flag_counts\": { \"missing_amount\": 3, \"missing_lead_source\": 4 },\n    \"departments_with_no_records\": []\n  }\n}\n\nA correct response looks like:\n\n{\n  \"executive_summary\": \"Sales generated 42 leads in the last 30 days with \n  a 37.5% win rate, down slightly from 41% last period. Referral remains \n  the strongest revenue source at $32,000, more than 8x Cold Outreach's \n  $4,000. Pipeline value stands at $84,000 across open deals.\",\n  \"risks_or_anomalies\": [\n    { \"description\": \"4 sales records are missing lead source data, \n      which limits confidence in the revenue-by-source breakdown.\", \n      \"severity\": \"medium\", \"department\": \"sales\" }\n  ],\n  \"recommended_actions\": [\n    { \"action\": \"Review the 4 records missing lead source before relying \n      on revenue-by-source figures for channel budget decisions.\", \n      \"priority\": \"medium\", \"department\": \"sales\" },\n    { \"action\": \"Investigate why Cold Outreach revenue is significantly \n      lower than Referral to determine if this reflects channel quality \n      or a data gap.\", \"priority\": \"low\", \"department\": \"sales\" }\n  ],\n  \"data_quality_notes\": \"3 records are missing deal amount and 4 are \n  missing lead source, affecting pipeline value and revenue-by-source \n  accuracy respectively. No other data quality issues were found for \n  this period.\"\n}",
+          "maxTokens": 3000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        4496,
+        64
+      ],
+      "id": "1d423b4d-2950-4b12-a18d-14462c4464f2",
+      "name": "Get AI Summary",
+      "credentials": {
+        "anthropicApi": {
+          "id": "B5EYf5dd4xIGlwvt",
+          "name": "kosi anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "babe2e3b-f82d-41af-af1e-b5c71e70d34a",
+              "leftValue": "={{ $json.ai_parse_succeeded }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5104,
+        48
+      ],
+      "id": "0ec89320-3e02-478b-8cb8-5234287fe943",
+      "name": "parsed correctly"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Runs immediately after the Claude node.\n// Claude's response now only contains AI-generated fields (executive_summary,\n// risks_or_anomalies, recommended_actions, data_quality_notes).\n// period_type, start_date, end_date, metrics, and data_quality_summary are\n// pulled directly from the metrics node — Claude never echoes them back.\n\nfunction extractRawText(item) {\n  const json = item.json;\n\n  if (typeof json.content === 'string') return json.content;\n  if (Array.isArray(json.content) && json.content[0]?.text) return json.content[0].text;\n  if (json.text) return json.text;\n  if (json.message?.content?.[0]?.text) return json.message.content[0].text;\n\n  return null;\n}\n\nfunction stripMarkdownFence(text) {\n  if (!text) return text;\n  return text\n    .trim()\n    .replace(/^```(?:json)?\\s*/i, '')\n    .replace(/```\\s*$/i, '')\n    .trim();\n}\n\n// Claude's response schema is now just the AI fields\nconst REQUIRED_KEYS = [\n  'executive_summary',\n  'risks_or_anomalies',\n  'recommended_actions',\n  'data_quality_notes',\n];\n\nconst results = items.map((item) => {\n  // Always pull passthrough fields from the original metrics node —\n  // needed on BOTH the success and fallback paths.\n  // Update 'Calculate Metrics' to your actual metrics node's name.\n  const originalInput = $('calculate metrics').item.json;\n\n  const passthrough = {\n    period_type: originalInput.period_type ?? null,\n    start_date: originalInput.start_date ?? null,\n    end_date: originalInput.end_date ?? null,\n    metrics: originalInput.metrics ?? null,\n    data_quality_summary: originalInput.data_quality_summary ?? null,\n    previous_period: originalInput.previous_period ?? null\n  };\n\n  const rawText = extractRawText(item);\n  const cleanedText = stripMarkdownFence(rawText);\n\n  let aiFields;\n  let parseSucceeded = true;\n\n  try {\n    if (!cleanedText) throw new Error('No text content found in Claude response');\n    const parsed = JSON.parse(cleanedText);\n\n    const hasAllKeys = REQUIRED_KEYS.every(k => k in parsed);\n    if (!hasAllKeys) throw new Error('Parsed JSON missing required fields');\n\n    aiFields = {\n      executive_summary: parsed.executive_summary,\n      risks_or_anomalies: parsed.risks_or_anomalies,\n      recommended_actions: parsed.recommended_actions,\n      data_quality_notes: parsed.data_quality_notes,\n    };\n\n  } catch (err) {\n    parseSucceeded = false;\n    aiFields = {\n      executive_summary: null,\n      risks_or_anomalies: [],\n      recommended_actions: [],\n      data_quality_notes: null,\n      parse_error: err.message,\n    };\n  }\n\n  return {\n    json: {\n      ...passthrough,\n      ...aiFields,\n      ai_parse_succeeded: parseSucceeded,\n    },\n  };\n});\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4880,
+        48
+      ],
+      "id": "f1d14e88-38a7-4a2b-b9ad-724535b8b97b",
+      "name": "parse claude output"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "request",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        816
+      ],
+      "id": "f79ea565-879e-439d-9811-788db750d121",
+      "name": "Webhook",
+      "webhookId": "593b1df8-1f63-4957-82ba-dfe0d77cf2a5"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "records",
+        "returnAll": true,
+        "filters": {
+          "conditions": []
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        816
+      ],
+      "id": "6a4d48dd-db55-47b5-8334-70927a2859a1",
+      "name": "Get all data",
+      "credentials": {
+        "supabaseApi": {
+          "id": "mTNliyxQ5tGHPQRT",
+          "name": "Supabase account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "claude-haiku-4-5-20251001"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.prompt }}"
+            }
+          ]
+        },
+        "options": {
+          "system": "# Role\n\nYou are an operations analyst assistant for Koya Talent, a company with \nSales, Project Delivery, and People Ops teams. You analyze pre-calculated \nbusiness metrics and produce structured, executive-ready insights for a \nreporting dashboard.\n\n# Task\n\nYou will receive a JSON object containing calculated metrics for Sales, \nProject Delivery, and People Ops for a specific reporting period — and, \nwhen available, the equivalent prior period's metrics for comparison — \nalong with a data quality summary. Your job is to analyze this data and \nreturn a structured insight report a manager can act on.\n\nYou do NOT calculate metrics yourself. All numbers are already computed \nand correct — your job is interpretation, not arithmetic.\n\n# Analysis Focus\n\nUse these questions to guide what you look for in each section — they \nare not a checklist to answer one-by-one in the output, but the lens for \ndeciding what belongs in the executive summary, risks, and actions. Only \nraise a point if the data actually supports it; if a question can't be \nanswered from the given fields, do not guess.\n\n**Sales**\n- Which lead source(s) in `revenue_by_lead_source` produced the most \n  revenue, and how does that compare to the others?\n- If `previous_period.sales` is provided, compare `win_rate` against it \n  and state whether it improved, declined, or stayed roughly stable \n  (treat changes under ~2 percentage points as \"stable\"). If no prior \n  period is provided, do not speculate about direction — say the trend \n  cannot be assessed from a single period.\n- Compare `marketing_spend` against `pipeline_value` and `revenue_won` — \n  is spend translating into proportionate pipeline/revenue, or is \n  `cost_per_lead` high relative to what's being closed?\n- Check `data_quality_summary.flag_counts` for sales-relevant flags \n  (e.g. missing amount, missing lead source, missing status) that would \n  affect confidence in the sales numbers above.\n\n**Project Delivery**\n- Using `delivery_load_by_team`, note any team carrying a disproportionate \n  share of active + completed projects relative to the others.\n- If `previous_period.project_delivery` is provided, compare \n  `blocked_projects` against it to say whether blocked projects are \n  increasing, decreasing, or stable. Otherwise, only report the current \n  count without a trend claim.\n- Use `on_time_completion_rate`, `average_delay_days`, `over_budget_projects`, \n  and `average_budget_variance` to identify whether delivery is slipping \n  on time, cost, or both.\n- Of everything found in this section, identify the single issue most \n  worth addressing first, and make sure it appears among the recommended \n  actions — grounded in its specific numbers, not a general statement.\n\n**People Ops**\n- Compare `new_hires` and `applications`/`offers_accepted` against what a \n  reader would need to judge hiring pace — state the numbers plainly; do \n  not assert whether that volume is \"enough\" unless a target or baseline \n  is present in the data to compare against.\n- Use `headcount_by_department` alongside `exits` if department-level exit \n  data is present in the input; if exits are not broken down by department \n  in the provided fields, say that this breakdown isn't available rather \n  than guessing which department it affects.\n- If `previous_period.people_ops` is provided, compare `time_to_hire_days` \n  and state whether it's increasing, decreasing, or stable. Otherwise, do \n  not claim a direction.\n- Check `data_quality_summary` for People Ops-relevant flags (e.g. missing \n  application or start dates) that would reduce confidence in hiring or \n  attrition figures.\n\n# Rules\n\n1. **Never invent numbers, causes, or context not present in the input \n   data.** Every claim you make must be traceable to a specific field in \n   the provided metrics.\n2. **If a metric is `null` or missing, do not guess a value or explanation \n   for it.** State plainly that it could not be calculated due to missing \n   data, and reference the relevant data quality flag if one exists.\n3. **If there is genuinely nothing noteworthy in a section** (e.g. no \n   meaningful risks, or no useful recommendation), say so directly — \n   do not fabricate a risk or action just to fill the field. An empty or \n   near-empty array is a valid, correct answer.\n4. **Do not speculate about causes you cannot see in the data.** For \n   example, if win rate dropped, you may state that it dropped and by how \n   much, but do not guess *why* (e.g. \"likely due to a weaker sales team\") \n   unless a specific data point supports that claim.\n5. **Never claim a trend (increasing/decreasing/improving/declining) \n   without a `previous_period` value to compare against.** If no prior \n   period is provided for a given metric, explicitly say the trend cannot \n   be assessed from a single period rather than omitting the question \n   silently or guessing a direction.\n6. **Keep the executive summary factual and concise** — 2-4 sentences, no \n   more. Do not editorialize or use marketing language.\n7. **Ground every recommended action in a specific number.** A vague \n   action like \"improve sales performance\" is not acceptable; \"investigate \n   why 4 of 9 sales records are missing lead source data before next \n   period's revenue-by-source analysis\" is.\n8. **List every relevant data quality issue in `data_quality_notes`**, \n   including blank dates, invalid dates, missing status, missing amount \n   or cost, records skipped from a calculation, and any department with \n   no records for the selected period. If `data_quality_summary` shows no \n   issues, state clearly that no data quality issues were found for this \n   period — do not fabricate one to fill the field.\n9. Output valid JSON only, matching the exact schema below. No markdown \n   formatting, no prose outside the JSON structure, no explanation of your \n   reasoning process.\n\n# Output Schema\n\nReturn exactly this structure:\n\n{\n  \"executive_summary\": \"string\",\n  \"risks_or_anomalies\": [\n    { \"description\": \"string\", \"severity\": \"low\" | \"medium\" | \"high\", \"department\": \"sales\" | \"project_delivery\" | \"people_ops\" | \"general\" }\n  ],\n  \"recommended_actions\": [\n    { \"action\": \"string\", \"priority\": \"low\" | \"medium\" | \"high\", \"department\": \"sales\" | \"project_delivery\" | \"people_ops\" | \"general\" }\n  ],\n  \"data_quality_notes\": \"string\"\n}\n\nIf there are no meaningful risks or actions, return an empty array for \nthat field — not a placeholder entry.\n\n# Example\n\nGiven this input:\n\n{\n  \"metrics\": {\n    \"sales\": {\n      \"total_leads\": 42,\n      \"closed_won\": 9,\n      \"closed_lost\": 15,\n      \"win_rate\": 0.375,\n      \"pipeline_value\": 84000,\n      \"cost_per_lead\": 118,\n      \"revenue_by_lead_source\": { \"Referral\": 32000, \"Cold Outreach\": 4000 }\n    }\n  },\n  \"previous_period\": {\n    \"sales\": { \"win_rate\": 0.41 }\n  },\n  \"data_quality_summary\": {\n    \"flag_counts\": { \"missing_amount\": 3, \"missing_lead_source\": 4 },\n    \"departments_with_no_records\": []\n  }\n}\n\nA correct response looks like:\n\n{\n  \"executive_summary\": \"Sales generated 42 leads in the last 30 days with \n  a 37.5% win rate, down slightly from 41% last period. Referral remains \n  the strongest revenue source at $32,000, more than 8x Cold Outreach's \n  $4,000. Pipeline value stands at $84,000 across open deals.\",\n  \"risks_or_anomalies\": [\n    { \"description\": \"4 sales records are missing lead source data, \n      which limits confidence in the revenue-by-source breakdown.\", \n      \"severity\": \"medium\", \"department\": \"sales\" }\n  ],\n  \"recommended_actions\": [\n    { \"action\": \"Review the 4 records missing lead source before relying \n      on revenue-by-source figures for channel budget decisions.\", \n      \"priority\": \"medium\", \"department\": \"sales\" },\n    { \"action\": \"Investigate why Cold Outreach revenue is significantly \n      lower than Referral to determine if this reflects channel quality \n      or a data gap.\", \"priority\": \"low\", \"department\": \"sales\" }\n  ],\n  \"data_quality_notes\": \"3 records are missing deal amount and 4 are \n  missing lead source, affecting pipeline value and revenue-by-source \n  accuracy respectively. No other data quality issues were found for \n  this period.\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        864,
+        864
+      ],
+      "id": "c275921d-7a80-4102-89d5-62d83026bf0a",
+      "name": "Get AI Analysis",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "anthropicApi": {
+          "id": "B5EYf5dd4xIGlwvt",
+          "name": "kosi anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Runs immediately after the Claude node.\n// Claude's response now only contains AI-generated fields (executive_summary,\n// risks_or_anomalies, recommended_actions, data_quality_notes).\n// period_type, start_date, end_date, metrics, and data_quality_summary are\n// pulled directly from the metrics node — Claude never echoes them back.\n\nfunction extractRawText(item) {\n  const json = item.json;\n\n  if (typeof json.content === 'string') return json.content;\n  if (Array.isArray(json.content) && json.content[0]?.text) return json.content[0].text;\n  if (json.text) return json.text;\n  if (json.message?.content?.[0]?.text) return json.message.content[0].text;\n\n  return null;\n}\n\nfunction stripMarkdownFence(text) {\n  if (!text) return text;\n  return text\n    .trim()\n    .replace(/^```(?:json)?\\s*/i, '')\n    .replace(/```\\s*$/i, '')\n    .trim();\n}\n\n// Claude's response schema is now just the AI fields\nconst REQUIRED_KEYS = [\n  'executive_summary',\n  'risks_or_anomalies',\n  'recommended_actions',\n  'data_quality_notes',\n];\n\nconst results = items.map((item) => {\n  // Always pull passthrough fields from the original metrics node —\n  // needed on BOTH the success and fallback paths.\n  // Update 'Calculate Metrics' to your actual metrics node's name.\n  const originalInput = $('calculate metrics for custom range').item.json;\n\n  const passthrough = {\n    period_type: originalInput.period_type ?? null,\n    start_date: originalInput.start_date ?? null,\n    end_date: originalInput.end_date ?? null,\n    metrics: originalInput.metrics ?? null,\n    data_quality_summary: originalInput.data_quality_summary ?? null,\n    previous_period: originalInput.previous_period ?? null,\n  };\n\n  const rawText = extractRawText(item);\n  const cleanedText = stripMarkdownFence(rawText);\n\n  let aiFields;\n  let parseSucceeded = true;\n\n  try {\n    if (!cleanedText) throw new Error('No text content found in Claude response');\n    const parsed = JSON.parse(cleanedText);\n\n    const hasAllKeys = REQUIRED_KEYS.every(k => k in parsed);\n    if (!hasAllKeys) throw new Error('Parsed JSON missing required fields');\n\n    aiFields = {\n      executive_summary: parsed.executive_summary,\n      risks_or_anomalies: parsed.risks_or_anomalies,\n      recommended_actions: parsed.recommended_actions,\n      data_quality_notes: parsed.data_quality_notes,\n    };\n\n  } catch (err) {\n    parseSucceeded = false;\n    aiFields = {\n      executive_summary: null,\n      risks_or_anomalies: [],\n      recommended_actions: [],\n      data_quality_notes: null,\n      parse_error: err.message,\n    };\n  }\n\n  return {\n    json: {\n      ...passthrough,\n      ...aiFields,\n      ai_parse_succeeded: parseSucceeded,\n    },\n  };\n});\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        864
+      ],
+      "id": "cd1ad7e3-9e9c-4762-8eab-50e6dddaedf1",
+      "name": "Parse claude output"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://lmbqaneywsoyknxhwerj.supabase.co/rest/v1/reports?on_conflict=period_type",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtYnFhbmV5d3NveWtueGh3ZXJqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODI5MTYzNSwiZXhwIjoyMTAzODY3NjM1fQ.ABNvIWuvCbr5sZG5gpEFvchXUEfkXdPZYRKgcReQ3t8"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtYnFhbmV5d3NveWtueGh3ZXJqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODI5MTYzNSwiZXhwIjoyMTAzODY3NjM1fQ.ABNvIWuvCbr5sZG5gpEFvchXUEfkXdPZYRKgcReQ3t8"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "period_type",
+              "value": "={{ $json.period_type }}"
+            },
+            {
+              "name": "start_date",
+              "value": "={{ $json.start_date }}"
+            },
+            {
+              "name": "end_date",
+              "value": "={{ $json.end_date }}"
+            },
+            {
+              "name": "metrics",
+              "value": "={{ JSON.stringify($json.metrics ?? null) }}"
+            },
+            {
+              "name": "data_quality_summary",
+              "value": "={{ JSON.stringify($json.data_quality_summary ?? null) }}"
+            },
+            {
+              "name": "ai_executive_summary",
+              "value": "={{ $json.executive_summary ?? null}}"
+            },
+            {
+              "name": "ai_risks_anomalies",
+              "value": "={{ JSON.stringify($json.risks_or_anomalies ?? null) }}"
+            },
+            {
+              "name": "ai_recommended_actions",
+              "value": "={{ JSON.stringify($json.recommended_actions ?? null) }}"
+            },
+            {
+              "name": "ai_data_quality_notes",
+              "value": "={{ $json.data_quality_notes ?? null }}"
+            },
+            {
+              "name": "generated_at",
+              "value": "={{ new Date().toISOString() }}"
+            },
+            {
+              "name": "previous_period",
+              "value": "={{ JSON.stringify($json.previous_period ?? null) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1600,
+        800
+      ],
+      "id": "c7cc5781-73ae-4e8c-baf9-a577d170237d",
+      "name": "upsert in supabase1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "36a17317-444e-4a02-8921-43004d891ec5",
+              "leftValue": "={{ $json.ai_parse_succeeded }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1376,
+        912
+      ],
+      "id": "1e2094a6-0a38-48ad-b716-0ec64fba5304",
+      "name": "parsed correctly1"
+    },
+    {
+      "parameters": {
+        "content": "## Dashboard & Reporting",
+        "height": 544,
+        "width": 2692,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -368,
+        704
+      ],
+      "typeVersion": 1,
+      "id": "3d21b56a-3332-4d2c-918c-d2f2935f689f",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "url": "=https://lmbqaneywsoyknxhwerj.supabase.co/rest/v1/records?source_record_id=in.({{ $json.ids.join(',') }})&select=source_record_id,record_hash",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtYnFhbmV5d3NveWtueGh3ZXJqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODI5MTYzNSwiZXhwIjoyMTAzODY3NjM1fQ.ABNvIWuvCbr5sZG5gpEFvchXUEfkXdPZYRKgcReQ3t8"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtYnFhbmV5d3NveWtueGh3ZXJqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4ODI5MTYzNSwiZXhwIjoyMTAzODY3NjM1fQ.ABNvIWuvCbr5sZG5gpEFvchXUEfkXdPZYRKgcReQ3t8"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1632,
+        -16
+      ],
+      "id": "edb7f966-5036-4a29-8b3f-127ebe47e79c",
+      "name": "get similar ids",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "214d8fb8-5d72-4481-be6c-0aebe30d34cc",
+              "leftValue": "={{ $json.no_data }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        336,
+        816
+      ],
+      "id": "28283529-a48c-44fa-8916-e216d7d8d1ab",
+      "name": "data exists for time period?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const webhookData = $('Webhook').first().json.body;\n\nconst period = {\n  start_date: webhookData.start_date,\n  end_date: webhookData.end_date,\n};\n\nconst periodStart = new Date(period.start_date);\nconst periodEnd = new Date(period.end_date);\nperiodEnd.setHours(23, 59, 59, 999);\n\n// --- Previous period: same length, immediately preceding ---\nconst periodLengthMs = periodEnd.getTime() - periodStart.getTime();\nconst prevPeriodEnd = new Date(periodStart.getTime() - 1); // 1ms before current period starts\nconst prevPeriodStart = new Date(prevPeriodEnd.getTime() - periodLengthMs);\n\nfunction inRange(dateStr, rangeStart, rangeEnd) {\n  if (!dateStr) return false;\n  const d = new Date(dateStr);\n  if (isNaN(d.getTime())) return false;\n  return d >= rangeStart && d <= rangeEnd;\n}\n\n// All fetched records (every department, unfiltered by date)\nconst allRecords = items.map(i => i.json);\n\nconst sales = allRecords.filter(r => r.department === 'sales');\nconst projects = allRecords.filter(r => r.department === 'project_delivery');\nconst peopleOps = allRecords.filter(r => r.department === 'people_ops');\n\n// ============================================\n// Reusable calculation — same logic, now parameterized by range\n// ============================================\nfunction calculateMetrics(rangeStart, rangeEnd) {\n  const inPeriod = (dateStr) => inRange(dateStr, rangeStart, rangeEnd);\n\n  // ===== SALES =====\n  const salesInPeriod = sales.filter(r => inPeriod(r.data.created_date));\n\n  const closedWon = salesInPeriod.filter(r => r.data.status === 'Closed Won');\n  const closedLost = salesInPeriod.filter(r => r.data.status === 'Closed Lost');\n  const openDeals = salesInPeriod.filter(r => ['Qualified', 'Proposal Sent'].includes(r.data.status));\n\n  const totalLeads = salesInPeriod.length;\n  const revenueWon = closedWon.reduce((sum, r) => sum + (r.data.amount || 0), 0);\n  const pipelineValue = openDeals.reduce((sum, r) => sum + (r.data.amount || 0), 0);\n\n  const wonPlusLost = closedWon.length + closedLost.length;\n  const winRate = wonPlusLost > 0 ? closedWon.length / wonPlusLost : null;\n\n  const monthlySpendMap = {};\n  const monthlySpendConflicts = new Set();\n  for (const r of salesInPeriod) {\n    const dateStr = r.data.created_date;\n    if (!dateStr) continue;\n    const d = new Date(dateStr);\n    if (isNaN(d.getTime())) continue;\n    const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;\n    const spend = r.data.marketing_spend;\n    if (spend === null || spend === undefined) continue;\n    if (monthKey in monthlySpendMap) {\n      if (monthlySpendMap[monthKey] !== spend) monthlySpendConflicts.add(monthKey);\n    } else {\n      monthlySpendMap[monthKey] = spend;\n    }\n  }\n  const marketingSpend = Object.values(monthlySpendMap).reduce((sum, v) => sum + v, 0);\n  const costPerLead = totalLeads > 0 ? marketingSpend / totalLeads : null;\n\n  const revenueByLeadSource = {};\n  for (const r of closedWon) {\n    const src = r.data.lead_source || 'Unknown';\n    revenueByLeadSource[src] = (revenueByLeadSource[src] || 0) + (r.data.amount || 0);\n  }\n\n  const salesMetrics = {\n    total_leads: totalLeads,\n    closed_won: closedWon.length,\n    closed_lost: closedLost.length,\n    pipeline_value: pipelineValue,\n    revenue_won: revenueWon,\n    win_rate: winRate,\n    marketing_spend: marketingSpend,\n    cost_per_lead: costPerLead,\n    revenue_by_lead_source: revenueByLeadSource,\n  };\n\n  // ===== PROJECT DELIVERY =====\n  const activeProjects = projects.filter(r => {\n    const status = r.data.status;\n    if (!['In Progress'].includes(status)) return false;\n\n    const kickoff = r.data.kickoff_date ? new Date(r.data.kickoff_date) : null;\n    if (!kickoff || kickoff > rangeEnd) return false;\n\n    const completed = r.data.completed_date ? new Date(r.data.completed_date) : null;\n    return !completed || completed >= rangeStart;\n  });\n\n  const completedInPeriod = projects.filter(r => inPeriod(r.data.completed_date));\n\n  const blockedProjects = projects.filter(r =>\n    r.data.status === 'Blocked' && inPeriod(r.data.kickoff_date)\n  );\n\n  const completedWithDueDates = completedInPeriod.filter(r => r.data.due_date && r.data.completed_date);\n  const onTimeCompleted = completedWithDueDates.filter(r =>\n    new Date(r.data.completed_date) <= new Date(r.data.due_date)\n  );\n  const onTimeRate = completedWithDueDates.length > 0\n    ? onTimeCompleted.length / completedWithDueDates.length\n    : null;\n\n  const lateCompleted = completedWithDueDates.filter(r =>\n    new Date(r.data.completed_date) > new Date(r.data.due_date)\n  );\n  const avgDelay = lateCompleted.length > 0\n    ? lateCompleted.reduce((sum, r) => {\n        const diffDays = (new Date(r.data.completed_date) - new Date(r.data.due_date)) / (1000 * 60 * 60 * 24);\n        return sum + diffDays;\n      }, 0) / lateCompleted.length\n    : null;\n\n  const projectsWithCosts = completedInPeriod.filter(r =>\n    r.data.actual_cost !== null && r.data.budgeted_cost !== null\n  );\n  const overBudgetProjects = projectsWithCosts.filter(r => r.data.actual_cost > r.data.budgeted_cost);\n  const avgBudgetVariance = projectsWithCosts.length > 0\n    ? projectsWithCosts.reduce((sum, r) => sum + (r.data.actual_cost - r.data.budgeted_cost), 0) / projectsWithCosts.length\n    : null;\n\n  const deliveryLoadByTeam = {};\n  for (const r of [...activeProjects, ...completedInPeriod]) {\n    const team = r.data.team || 'Unassigned';\n    deliveryLoadByTeam[team] = (deliveryLoadByTeam[team] || 0) + 1;\n  }\n\n  const projectMetrics = {\n    active_projects: activeProjects.length,\n    completed_projects: completedInPeriod.length,\n    blocked_projects: blockedProjects.length,\n    on_time_completion_rate: onTimeRate,\n    average_delay_days: avgDelay,\n    over_budget_projects: overBudgetProjects.length,\n    average_budget_variance: avgBudgetVariance,\n    delivery_load_by_team: deliveryLoadByTeam,\n  };\n\n  // ===== PEOPLE OPS =====\n  const applications = peopleOps.filter(r => inPeriod(r.data.application_date));\n  const offersAccepted = peopleOps.filter(r => inPeriod(r.data.offer_accepted_date));\n  const newHires = peopleOps.filter(r => inPeriod(r.data.start_date));\n  const exits = peopleOps.filter(r => inPeriod(r.data.exit_date));\n\n  const activeHeadcount = peopleOps.filter(r => {\n    const start = r.data.start_date ? new Date(r.data.start_date) : null;\n    const exit = r.data.exit_date ? new Date(r.data.exit_date) : null;\n    if (!start || start > rangeEnd) return false;\n    if (exit && exit <= rangeEnd) return false;\n    return true;\n  }).length;\n\n  const activeHeadcountAtStart = peopleOps.filter(r => {\n    const start = r.data.start_date ? new Date(r.data.start_date) : null;\n    const exit = r.data.exit_date ? new Date(r.data.exit_date) : null;\n    if (!start || start >= rangeStart) return false;\n    if (exit && exit < rangeStart) return false;\n    return true;\n  }).length;\n\n  const attritionRate = activeHeadcountAtStart > 0 ? exits.length / activeHeadcountAtStart : null;\n\n  const hiresWithBothDates = newHires.filter(r => r.data.application_date && r.data.start_date);\n  const timeToHire = hiresWithBothDates.length > 0\n    ? hiresWithBothDates.reduce((sum, r) => {\n        const days = (new Date(r.data.start_date) - new Date(r.data.application_date)) / (1000 * 60 * 60 * 24);\n        return sum + days;\n      }, 0) / hiresWithBothDates.length\n    : null;\n\n  const offersWithBothDates = offersAccepted.filter(r => r.data.application_date && r.data.offer_accepted_date);\n  const offerAcceptanceTime = offersWithBothDates.length > 0\n    ? offersWithBothDates.reduce((sum, r) => {\n        const days = (new Date(r.data.offer_accepted_date) - new Date(r.data.application_date)) / (1000 * 60 * 60 * 24);\n        return sum + days;\n      }, 0) / offersWithBothDates.length\n    : null;\n\n  const headcountByDept = {};\n  for (const r of peopleOps) {\n    const start = r.data.start_date ? new Date(r.data.start_date) : null;\n    const exit = r.data.exit_date ? new Date(r.data.exit_date) : null;\n    const isActiveAtEnd = start && start <= rangeEnd && (!exit || exit > rangeEnd);\n    if (isActiveAtEnd) {\n      const dept = r.data.department || 'Unassigned';\n      headcountByDept[dept] = (headcountByDept[dept] || 0) + 1;\n    }\n  }\n\n  const peopleOpsMetrics = {\n    applications: applications.length,\n    offers_accepted: offersAccepted.length,\n    new_hires: newHires.length,\n    exits: exits.length,\n    active_headcount: activeHeadcount,\n    time_to_hire_days: timeToHire,\n    offer_acceptance_time_days: offerAcceptanceTime,\n    attrition_rate: attritionRate,\n    headcount_by_department: headcountByDept,\n  };\n\n  const hasAnyData =\n    salesInPeriod.length > 0 ||\n    activeProjects.length > 0 || completedInPeriod.length > 0 ||\n    applications.length > 0 || newHires.length > 0;\n\n  return {\n    sales: salesMetrics,\n    project_delivery: projectMetrics,\n    people_ops: peopleOpsMetrics,\n    monthlySpendConflicts,\n    hasAnyData,\n    // raw filtered sets, needed only for the CURRENT period's data quality summary\n    salesInPeriod, activeProjects, completedInPeriod, applications, newHires,\n  };\n}\n\n// --- Calculate both periods ---\nconst current = calculateMetrics(periodStart, periodEnd);\nconst previous = calculateMetrics(prevPeriodStart, prevPeriodEnd);\n\n// ============================================\n// No-data check — based on the CURRENT period only\n// ============================================\nif (!current.hasAnyData) {\n  return [{\n    json: {\n      period_type: `custom_${period.start_date}_${period.end_date}_${Date.now()}`,\n      start_date: period.start_date,\n      end_date: period.end_date,\n      no_data: true,\n      metrics: null,\n      previous_period: null,\n      data_quality_summary: null,\n      ai_executive_summary: null,\n      ai_risks_anomalies: [],\n      ai_recommended_actions: [],\n      ai_data_quality_notes: null,\n    }\n  }];\n}\n\n// ============================================\n// DATA QUALITY SUMMARY — current period only\n// ============================================\nconst flagCounts = {};\nfor (const r of allRecords) {\n  for (const flag of (r.quality_flags || [])) {\n    flagCounts[flag] = (flagCounts[flag] || 0) + 1;\n  }\n}\n\nconst departmentsWithNoRecords = [];\nif (current.salesInPeriod.length === 0) departmentsWithNoRecords.push('sales');\nif (current.activeProjects.length === 0 && current.completedInPeriod.length === 0) departmentsWithNoRecords.push('project_delivery');\nif (current.applications.length === 0 && current.newHires.length === 0) departmentsWithNoRecords.push('people_ops');\n\nconst dataQualitySummary = {\n  flag_counts: {\n    ...flagCounts,\n    ...(current.monthlySpendConflicts.size > 0 ? { inconsistent_marketing_spend_in_month: current.monthlySpendConflicts.size } : {})\n  },\n  total_flagged_records: allRecords.filter(r => (r.quality_flags || []).length > 0).length,\n  departments_with_no_records: departmentsWithNoRecords,\n};\n\n// ============================================\n// FINAL OUTPUT — now includes previous_period\n// ============================================\nreturn [{\n  json: {\n    period_type: `custom_${period.start_date}_${period.end_date}_${Date.now()}`,\n    start_date: period.start_date,\n    end_date: period.end_date,\n    no_data: false,\n    metrics: {\n      sales: current.sales,\n      project_delivery: current.project_delivery,\n      people_ops: current.people_ops,\n    },\n    previous_period: previous.hasAnyData ? {\n      sales: previous.sales,\n      project_delivery: previous.project_delivery,\n      people_ops: previous.people_ops,\n    } : null, // no prior data to compare against let Claude know honestly, not send zeros\n    data_quality_summary: dataQualitySummary,\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        816
+      ],
+      "id": "1c343d9f-1c02-4d63-8e50-c0f8e6fe46d8",
+      "name": "calculate metrics for custom range"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2048,
+        800
+      ],
+      "id": "fb89dd1f-3028-4892-8ccd-98fbbe272329",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -320,
+        1504
+      ],
+      "id": "ae7effcd-1ef5-4bf1-bcb6-5b7bcccd02e7",
+      "name": "Send weekly report"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Runs right before \"Respond to Webhook\".\n// Input: the Supabase upsert node's response (array-wrapped row, with\n// jsonb columns possibly returned as JSON-encoded strings).\n// Output: one clean object, with every jsonb field as a real object/array.\n\nconst raw = items[0].json;\nconst row = Array.isArray(raw) ? raw[0] : raw;\n\nif (!row) {\n  return [{\n    json: {\n      error: true,\n      message: 'No report row returned from Supabase upsert.',\n    }\n  }];\n}\n\nfunction parseIfString(val, fallback) {\n  if (typeof val !== 'string') return val ?? fallback;\n  try {\n    return JSON.parse(val);\n  } catch {\n    return fallback;\n  }\n}\n\nconst cleaned = {\n  id: row.id,\n  period_type: row.period_type,\n  start_date: row.start_date,\n  end_date: row.end_date,\n  metrics: parseIfString(row.metrics, null),\n  data_quality_summary: parseIfString(row.data_quality_summary, null),\n  ai_executive_summary: row.ai_executive_summary ?? null,\n  ai_risks_anomalies: parseIfString(row.ai_risks_anomalies, []),\n  ai_recommended_actions: parseIfString(row.ai_recommended_actions, []),\n  ai_data_quality_notes: row.ai_data_quality_notes ?? null,\n  review_status: row.review_status ?? null,\n  generated_at: row.generated_at ?? null,\n};\n\nreturn [{ json: cleaned }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        800
+      ],
+      "id": "18bc9236-7365-433f-9698-12506577bdf9",
+      "name": "parse output"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-5-20250929",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-5-20250929"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Analyze the following operational data for the period:\n{{ $json.start_date }} to {{ $json.end_date }}).\n\n## Sales Metrics\n{{ JSON.stringify($json.metrics.sales) }}\n\n## Project Delivery Metrics\n{{JSON.stringify($json.metrics.project_delivery)}}\n\n## People Ops Metrics\n{{JSON.stringify($json.metrics.people_ops)}}\n\n## Data Quality Summary\n{{JSON.stringify($json.data_quality_summary)}}\n\nReturn your analysis in the exact JSON schema specified in your \ninstructions."
+            }
+          ]
+        },
+        "options": {
+          "system": "# Role\n\nYou are a reporting assistant summarizing one week of activity on Koya \nTalent's internal operations dashboard, for a weekly email sent to \nleadership every Sunday morning.\n\n# Task\n\nYou will receive: (1) a count of new/updated records per department this \nweek vs. the prior week, (2) a log of dashboard usage events for the \nweek (which periods and departments were viewed, and how often), and \n(3) the most recent standard-period reports (last_30, last_90, ytd) \ngenerated during the week. Summarize this into a short, skimmable weekly \ndigest.\n\n# Rules\n\n1. Never invent numbers not present in the input. Every claim must trace \n   to a specific field you were given.\n2. Only call something a \"spike\" if this week's count for a department \n   is meaningfully higher than last week's (roughly 30% or more, or a \n   clear jump in absolute terms for small numbers) — do not label normal \n   week-to-week variation as a spike.\n3. For dashboard usage, identify the most-viewed period_type and the \n   most-viewed department, if the usage log contains any events. If the \n   usage log is empty, say plainly that there were no dashboard views \n   logged this week — do not guess engagement.\n4. Keep the tone plain and factual — this is an internal ops email, not \n   a marketing summary.\n5. If nothing noteworthy happened this week (no spikes, no usage, no new \n   risks), say so directly instead of manufacturing content to fill \n   the report.\n6. Output valid JSON only, matching the schema below — no markdown, no \n   text outside the JSON.\n\n# Output Schema\n\n{\n  \"week_range\": \"string, e.g. '21 Jun – 28 Jun 2026'\",\n  \"summary\": \"string, 2-3 sentences, plain-language overview of the week\",\n  \"data_spikes\": [\n    { \"department\": \"sales\" | \"project_delivery\" | \"people_ops\", \"description\": \"string\" }\n  ],\n  \"dashboard_usage\": {\n    \"total_views\": \"number\",\n    \"most_viewed_period\": \"string or null\",\n    \"most_viewed_department\": \"string or null\",\n    \"note\": \"string — plain-language observation, or a note that no usage was logged\"\n  },\n  \"notable_reports\": \"string — anything worth flagging from this week's last_30/last_90/ytd reports, or 'Nothing notable this week.'\"\n}\n\n# Example\n\nGiven this input:\n{\n  \"record_counts\": {\n    \"this_week\": { \"sales\": 24, \"project_delivery\": 6, \"people_ops\": 3 },\n    \"last_week\": { \"sales\": 11, \"project_delivery\": 7, \"people_ops\": 2 }\n  },\n  \"usage_events\": [\n    { \"period_type\": \"last_30\", \"department\": \"sales\" },\n    { \"period_type\": \"last_30\", \"department\": \"sales\" },\n    { \"period_type\": \"ytd\", \"department\": null }\n  ],\n  \"week_range\": \"21 Jun – 28 Jun 2026\"\n}\n\nA correct response looks like:\n\n{\n  \"week_range\": \"21 Jun – 28 Jun 2026\",\n  \"summary\": \"Sales activity more than doubled this week (24 new/updated \n  records vs. 11 last week), while Project Delivery and People Ops stayed \n  roughly flat. Dashboard usage this week was concentrated on Sales, last \n  30 days.\",\n  \"data_spikes\": [\n    { \"department\": \"sales\", \"description\": \"24 new or updated sales \n      records this week, up from 11 last week — more than double.\" }\n  ],\n  \"dashboard_usage\": {\n    \"total_views\": 3,\n    \"most_viewed_period\": \"last_30\",\n    \"most_viewed_department\": \"sales\",\n    \"note\": \"Sales, last 30 days was viewed more than any other combination this week.\"\n  },\n  \"notable_reports\": \"Nothing notable this week.\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        576,
+        1504
+      ],
+      "id": "cdf6e346-8f32-4a68-a9d1-b1dfe7c1ba06",
+      "name": "Send weekly report1",
+      "credentials": {
+        "anthropicApi": {
+          "id": "B5EYf5dd4xIGlwvt",
+          "name": "kosi anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Runs right before \"Respond to Webhook\".\n// Input: the Supabase upsert node's response (array-wrapped row, with\n// jsonb columns possibly returned as JSON-encoded strings).\n// Output: one clean object, with every jsonb field as a real object/array.\n\nconst raw = items[0].json;\nconst row = Array.isArray(raw) ? raw[0] : raw;\n\nif (!row) {\n  return [{\n    json: {\n      error: true,\n      message: 'No report row returned from Supabase upsert.',\n    }\n  }];\n}\n\nfunction parseIfString(val, fallback) {\n  if (typeof val !== 'string') return val ?? fallback;\n  try {\n    return JSON.parse(val);\n  } catch {\n    return fallback;\n  }\n}\n\nconst cleaned = {\n  id: row.id,\n  period_type: row.period_type,\n  start_date: row.start_date,\n  end_date: row.end_date,\n  metrics: parseIfString(row.metrics, null),\n  data_quality_summary: parseIfString(row.data_quality_summary, null),\n  ai_executive_summary: row.ai_executive_summary ?? null,\n  ai_risks_anomalies: parseIfString(row.ai_risks_anomalies, []),\n  ai_recommended_actions: parseIfString(row.ai_recommended_actions, []),\n  ai_data_quality_notes: row.ai_data_quality_notes ?? null,\n  review_status: row.review_status ?? null,\n  generated_at: row.generated_at ?? null,\n};\n\nreturn [{ json: cleaned }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        1504
+      ],
+      "id": "b82514db-e8be-4607-b112-39e175732e61",
+      "name": "parse claude output1"
+    },
+    {
+      "parameters": {
+        "sendTo": "nebolisako@gmail.com",
+        "subject": "Operations Weekly Digest ! ",
+        "message": "nn",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        1504
+      ],
+      "id": "6d52355f-cf5f-4233-87e2-c354dccd56d2",
+      "name": "Send a message",
+      "webhookId": "6ba225ca-a2ae-4674-8780-a6f54fa7c6b7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "iz6ZfhX9HzfzOusB",
+          "name": "kosi gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date(); // fires Sunday 8:00 AM\n\nconst weekEnd = new Date(now);\nweekEnd.setHours(0, 0, 0, 0); // midnight, start of today (this Sunday)\n\nconst weekStart = new Date(weekEnd);\nweekStart.setDate(weekStart.getDate() - 7); // previous Sunday, same time\n\nfunction toIsoDate(d) { return d.toISOString().split('T')[0]; }\n\nreturn [{\n  json: {\n    week_start: toIsoDate(weekStart), // e.g. \"2026-06-21\"\n    week_end: toIsoDate(weekEnd),     // e.g. \"2026-06-28\"\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        1504
+      ],
+      "id": "fc540e3f-913f-40d2-a76d-325bba833659",
+      "name": "get date range"
+    },
+    {
+      "parameters": {
+        "content": "## Weekly Digest\n",
+        "height": 288,
+        "width": 1636
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -288,
+        1424
+      ],
+      "typeVersion": 1,
+      "id": "3126e54a-9283-4dca-9ac4-21486d94f948",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fd1ffc94-73c5-46c8-a6c2-c60e67628c2a",
+              "name": "prompt",
+              "value": "=Hey Claude. I need you to return a very short, concise response\n\nAnalyze the following operational data for the period:  {{ $json.period_type }}\n{{ $json.start_date }} to {{ $json.end_date }}).\n\n## Sales Metrics\n{{ JSON.stringify($json.metrics.sales) }}\n\n## Project Delivery Metrics\n{{JSON.stringify($json.metrics.project_delivery)}}\n\n## People Ops Metrics\n{{JSON.stringify($json.metrics.people_ops)}}\n\n## Data Quality Summary\n{{JSON.stringify($json.data_quality_summary)}}\n\n##Previous Period\n{{JSON.stringify($json.previous_period)}}\n\nReturn your analysis in the exact JSON schema specified in your \ninstructions.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1728,
+        992
+      ],
+      "id": "f0477dde-952c-4251-ba8c-49c6bd3c9ab9",
+      "name": "set retry prompt"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d9614ffd-599c-4f2c-bb6a-dfb6bafebe3c",
+              "name": "prompt",
+              "value": "=Analyze the following operational data for the period:  {{ $json.period_type }}\n{{ $json.start_date }} to {{ $json.end_date }}).\n\n## Sales Metrics\n{{ JSON.stringify($json.metrics.sales) }}\n\n## Project Delivery Metrics\n{{JSON.stringify($json.metrics.project_delivery)}}\n\n## People Ops Metrics\n{{JSON.stringify($json.metrics.people_ops)}}\n\n## Data Quality Summary\n{{JSON.stringify($json.data_quality_summary)}}\n\n##Previous Period\n{{JSON.stringify($json.previous_period)}}\n\nReturn your analysis in the exact JSON schema specified in your \ninstructions.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        576,
+        768
+      ],
+      "id": "5cc00ca9-0360-4e44-8116-04fe9b9d82b2",
+      "name": "set prompt"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "93360af5-3a07-4b6e-8e71-b5ba648b57ab",
+              "name": "prompt",
+              "value": "=Hey Claude. I need you to return a very short, concise response  Analyze the following operational data for the period:  {{ $json.period_type }} {{ $json.start_date }} to {{ $json.end_date }}).  ## Sales Metrics {{ JSON.stringify($json.metrics.sales) }}  ## Project Delivery Metrics {{JSON.stringify($json.metrics.project_delivery)}}  ## People Ops Metrics {{JSON.stringify($json.metrics.people_ops)}}  ## Data Quality Summary {{JSON.stringify($json.data_quality_summary)}}  ##Previous Period {{JSON.stringify($json.previous_period)}}  Return your analysis in the exact JSON schema specified in your  instructions.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        5456,
+        224
+      ],
+      "id": "50c8d37c-44fa-407e-aa59-bf8b97ae15f5",
+      "name": "set retry prompt1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "73931885-6caa-44a6-a2ef-727a48dc4145",
+              "name": "prompt",
+              "value": "=Analyze the following operational data for the period:  {{ $json.period_type }} {{ $json.start_date }} to {{ $json.end_date }}).  ## Sales Metrics {{ JSON.stringify($json.metrics.sales) }}  \n\n## Project Delivery Metrics {{JSON.stringify($json.metrics.project_delivery)}}  \n\n## People Ops Metrics {{JSON.stringify($json.metrics.people_ops)}}  \n\n## Data Quality Summary {{JSON.stringify($json.data_quality_summary)}}  \n\n##Previous Period {{JSON.stringify($json.previous_period)}}  Return your analysis in the exact JSON schema specified in your  instructions.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        4256,
+        64
+      ],
+      "id": "657e164c-3876-4069-be75-22cfcc7896a3",
+      "name": "set prompt1"
+    },
+    {
+      "parameters": {
+        "url": "reports?period_type=like.custom_*&generated_at=gte.{week_start}&generated_at=lte.{week_end})",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        128,
+        1504
+      ],
+      "id": "270bf135-f161-4d26-9a7f-b3a75ac06516",
+      "name": "get the week's report"
+    }
+  ],
+  "pinData": {
+    "Get AI Analysis": [
+      {
+        "json": {
+          "content": [
+            {
+              "type": "text",
+              "text": "```json\n{\n  \"executive_summary\": \"This reporting period shows no sales activity, no project completions, and no hiring or attrition. Project Delivery maintains 12 active projects with 5 blocked; all other teams have no recorded activity. Data quality issues affect 3 records across projects. This period appears to reflect either a data collection gap or a genuine operational pause.\",\n  \"risks_or_anomalies\": [\n    {\n      \"description\": \"Sales department has no records for this period. No leads, opportunities, or revenue were captured, which may indicate a data collection issue or complete absence of sales activity.\",\n      \"severity\": \"high\",\n      \"department\": \"sales\"\n    },\n    {\n      \"description\": \"People Ops reports 86 active headcount but shows all headcount in People Ops department only, with no records for Sales, Project Delivery, or other functions. This distribution is implausible and suggests incomplete data collection.\",\n      \"severity\": \"high\",\n      \"department\": \"people_ops\"\n    },\n    {\n      \"description\": \"5 of 12 active projects (42%) are currently blocked, indicating significant delivery impediments that require immediate attention.\",\n      \"severity\": \"high\",\n      \"department\": \"project_delivery\"\n    },\n    {\n      \"description\": \"Project Delivery metrics lack completion data: on_time_completion_rate, average_delay_days, and average_budget_variance are all null, preventing assessment of delivery performance.\",\n      \"severity\": \"medium\",\n      \"department\": \"project_delivery\"\n    }\n  ],\n  \"recommended_actions\": [\n    {\n      \"action\": \"Verify Sales data collection for the period 2026-09-03 to 2026-09-24. Confirm whether zero leads and zero closed deals reflect actual business activity or a data capture failure before next reporting cycle.\",\n      \"priority\": \"high\",\n      \"department\": \"sales\"\n    },\n    {\n      \"action\": \"Investigate the 5 blocked projects immediately to identify blockers and owners responsible for resolution. Document root causes and required actions to unblock each.\",\n      \"priority\": \"high\",\n      \"department\": \"project_delivery\"\n    },\n    {\n      \"description\": \"Reconcile People Ops headcount data. Verify why all 86 employees are recorded in People Ops department only, with no records for Sales, Project Delivery, or other teams.\",\n      \"priority\": \"high\",\n      \"department\": \"people_ops\"\n    },\n    {\n      \"action\": \"Audit the 3 flagged project records (1 missing due date, 1 missing status, 1 missing amount) and correct or re-enter data before using Project Delivery metrics for planning decisions.\",\n      \"priority\": \"medium\",\n      \"department\": \"project_delivery\"\n    }\n  ],\n  \"data_quality_notes\": \"Critical data collection issues detected: Sales department has no records for this period; People Ops headcount is concentrated entirely in one department with no records for Sales or Project Delivery, which is inconsistent with the presence of active projects and typical organizational structure. Project Delivery has 3 flagged records: 1 missing due date, 1 missing status, and 1 missing amount. These gaps prevent reliable calculation of win rates, cost per lead, time to hire, and project completion metrics. Sales and People Ops departments are listed as having no records for the selected period.\"\n}\n```"
+            }
+          ]
+        }
+      }
+    ],
+    "Parse claude output": [
+      {
+        "json": {
+          "period_type": "custom_2025-06-13_2026-03-22_1788545023744",
+          "start_date": "2025-06-13",
+          "end_date": "2026-03-22",
+          "metrics": {
+            "sales": {
+              "total_leads": 77,
+              "closed_won": 29,
+              "closed_lost": 20,
+              "pipeline_value": 236600,
+              "revenue_won": 250800,
+              "win_rate": 0.5918367346938775,
+              "marketing_spend": 20700,
+              "cost_per_lead": 268.83116883116884,
+              "revenue_by_lead_source": {
+                "Referral": 51250,
+                "Event": 54050,
+                "Outbound": 53350,
+                "Inbound": 47400,
+                "Partner": 44750
+              }
+            },
+            "project_delivery": {
+              "active_projects": 0,
+              "completed_projects": 35,
+              "blocked_projects": 0,
+              "on_time_completion_rate": 0.5294117647058824,
+              "average_delay_days": 5,
+              "over_budget_projects": 17,
+              "average_budget_variance": 130.57142857142858,
+              "delivery_load_by_team": {
+                "Client Ops": 8,
+                "Data": 9,
+                "Automation": 10,
+                "AI Apps": 8
+              }
+            },
+            "people_ops": {
+              "applications": 48,
+              "offers_accepted": 45,
+              "new_hires": 44,
+              "exits": 3,
+              "active_headcount": 64,
+              "time_to_hire_days": 30,
+              "offer_acceptance_time_days": 18.8,
+              "attrition_rate": 0.13043478260869565,
+              "headcount_by_department": {
+                "Unassigned": 64
+              }
+            }
+          },
+          "data_quality_summary": {
+            "flag_counts": {
+              "missing_due_date": 1,
+              "missing_status": 1,
+              "missing_amount": 1,
+              "inconsistent_marketing_spend_in_month": 1
+            },
+            "total_flagged_records": 3,
+            "departments_with_no_records": []
+          },
+          "executive_summary": null,
+          "risks_or_anomalies": [],
+          "recommended_actions": [],
+          "data_quality_notes": null,
+          "parse_error": "Unterminated string in JSON at position 3892 (line 57 column 96)",
+          "ai_parse_succeeded": false
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "get project del info",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "get data from people ops",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get data from people ops": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "set fields people",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "set fields sales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get project del info": {
+      "main": [
+        [
+          {
+            "node": "flatten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set fields sales": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "set fields people": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "set fields project": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "normalize data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "flatten": {
+      "main": [
+        [
+          {
+            "node": "set fields project",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "normalize data": {
+      "main": [
+        [
+          {
+            "node": "is unique_identifier present?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "is unique_identifier present?": {
+      "main": [
+        [
+          {
+            "node": "turn individual items to one list",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "clean data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prevent data loss": {
+      "main": [
+        [
+          {
+            "node": "not duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "turn individual items to one list": {
+      "main": [
+        [
+          {
+            "node": "get similar ids",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "not duplicate?": {
+      "main": [
+        [
+          {
+            "node": "clean data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "clean data": {
+      "main": [
+        [
+          {
+            "node": "group items into array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "group items into array": {
+      "main": [
+        [
+          {
+            "node": "upsert in supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "upsert in supabase": {
+      "main": [
+        [
+          {
+            "node": "define time periods",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "get data within time period",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calculate metrics": {
+      "main": [
+        [
+          {
+            "node": "set prompt1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "define time periods": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get data within time period": {
+      "main": [
+        [
+          {
+            "node": "calculate metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "upsert into reports": {
+      "main": [
+        [
+          {
+            "node": "define time periods",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get AI Summary": {
+      "main": [
+        [
+          {
+            "node": "parse claude output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parsed correctly": {
+      "main": [
+        [
+          {
+            "node": "upsert into reports",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "set retry prompt1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse claude output": {
+      "main": [
+        [
+          {
+            "node": "parsed correctly",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get all data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all data": {
+      "main": [
+        [
+          {
+            "node": "calculate metrics for custom range",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get AI Analysis": {
+      "main": [
+        [
+          {
+            "node": "Parse claude output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse claude output": {
+      "main": [
+        [
+          {
+            "node": "parsed correctly1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parsed correctly1": {
+      "main": [
+        [
+          {
+            "node": "upsert in supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "set retry prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get similar ids": {
+      "main": [
+        [
+          {
+            "node": "prevent data loss",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data exists for time period?": {
+      "main": [
+        [
+          {
+            "node": "set prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "upsert in supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calculate metrics for custom range": {
+      "main": [
+        [
+          {
+            "node": "data exists for time period?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "upsert in supabase1": {
+      "main": [
+        [
+          {
+            "node": "parse output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send weekly report": {
+      "main": [
+        [
+          {
+            "node": "get date range",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse output": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send weekly report1": {
+      "main": [
+        [
+          {
+            "node": "parse claude output1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse claude output1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get date range": {
+      "main": [
+        [
+          {
+            "node": "get the week's report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set prompt": {
+      "main": [
+        [
+          {
+            "node": "Get AI Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set retry prompt": {
+      "main": [
+        [
+          {
+            "node": "Get AI Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set retry prompt1": {
+      "main": [
+        [
+          {
+            "node": "Get AI Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "set prompt1": {
+      "main": [
+        [
+          {
+            "node": "Get AI Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get the week's report": {
+      "main": [
+        [
+          {
+            "node": "Send weekly report1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "8s62rgGs3CUTDyro",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "e8f88c91-7b3c-4486-ae8b-f39a73f166c9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4c7399d63283ab23b038107b3d9551ef4ce9469e21819dd4d80f7395ea107ece"
+  },
+  "nodeGroups": [],
+  "id": "YJBGKA1uV0NSVEzG",
+  "tags": []
+}

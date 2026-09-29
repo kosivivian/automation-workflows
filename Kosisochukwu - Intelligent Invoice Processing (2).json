@@ -1,0 +1,1494 @@
+{
+  "name": "Kosisochukwu - Intelligent Invoice Processing",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": ""
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -272,
+        16
+      ],
+      "id": "0a68c3dc-fd6e-4148-8c1f-3da20f291b6d",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "iz6ZfhX9HzfzOusB",
+          "name": "kosi gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        -64
+      ],
+      "id": "7c0e2c6e-18a9-4a6f-af1a-ffaa402de2e5",
+      "name": "Get a message",
+      "webhookId": "7071bc17-1fe5-4327-ba06-82cb93c477fd",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "iz6ZfhX9HzfzOusB",
+          "name": "kosi gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "00d2da29-2566-49f4-a7c8-2548aa4ae64d",
+              "leftValue": "={{ [\"invoice\", \"billing\", \"payment\", \"charges\", \"bill\", \"inv #\", \"invoice number\", \"statement of account\", \"accounts payable\", \"outstanding balance\", \"fee note\", \"fee\"].some(keyword => ($json.Subject || \"\").toLowerCase().includes(keyword)) }}",
+              "rightValue": "=[\"Contact Now\", \"Nurture\", \"Qualified\"]",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "e3186311-3b7e-40c5-976b-99a4410b9b59",
+              "leftValue": "={{ [\"invoice\", \"billing\", \"payment\", \"charges\", \"bill\", \"inv #\", \"invoice number\", \"statement of account\", \"accounts payable\", \"outstanding balance\", \"fee\", \"fee note\"].some(keyword => ($json.snippet || \"\").toLowerCase().includes(keyword)) }}",
+              "rightValue": "invoice, billing, payment, receipt",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -64,
+        16
+      ],
+      "id": "7bc0fb96-018b-40db-b157-6498eaa2fb18",
+      "name": "Filter non-invoice emails"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "={{ Object.keys($binary)[0] }}",
+        "options": {
+          "keepSource": "both"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        -192
+      ],
+      "id": "4e757921-e142-48e0-8fa5-042cde6f7354",
+      "name": "Extract info from pdf",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// =====================================================\n// ORIGINAL EMAIL\n// =====================================================\n\nconst email = $('Get a message').first().json;\n\n\n// =====================================================\n// EMAIL INFORMATION\n// =====================================================\n\nconst body =\n  email.text ||\n  email.html ||\n  '';\n\nconst senderAddress =\n  email.from?.value?.[0]?.address ||\n  email.from?.email ||\n  'Unknown sender';\n\nconst subject =\n  email.subject ||\n  '';\n\n\n// =====================================================\n// GET ALL PROCESSED ATTACHMENTS FROM MERGE\n// =====================================================\n\nconst inputItems = $input.all();\n\n\n// =====================================================\n// REMOVE DUPLICATES\n// =====================================================\n\nconst attachmentMap = new Map();\n\nfor (const item of inputItems) {\n\n  const data = item.json || {};\n\n  // Only process actual attachment records\n  if (!data.attachmentId && !data.fileName) {\n    continue;\n  }\n\n  const attachmentId =\n    data.attachmentId ||\n    data.fileName ||\n    `attachment_${attachmentMap.size}`;\n\n\n  const currentText =\n    data.extractedText ||\n    '';\n\n\n  const existing =\n    attachmentMap.get(attachmentId);\n\n\n  // ---------------------------------------------------\n  // FIRST VERSION OF ATTACHMENT\n  // ---------------------------------------------------\n\n  if (!existing) {\n\n    attachmentMap.set(\n      attachmentId,\n      {\n        attachmentId,\n\n        fileName:\n          data.fileName ||\n          'Unknown attachment',\n\n        mimeType:\n          data.mimeType ||\n          null,\n\n        fileType:\n          data.fileType ||\n          'unknown',\n\n        extractedText:\n          currentText,\n\n        extractionSuccessful:\n          data.extractionSuccessful === true,\n\n        needsOCR:\n          data.needsOCR === true,\n\n        extractionMethod:\n          data.extractionMethod ||\n          'unknown',\n\n        validationStatus:\n          data.validationStatus ||\n          null,\n\n        isInvoice:\n          data.isInvoice ??\n          null\n      }\n    );\n\n  }\n\n\n  // ---------------------------------------------------\n  // DUPLICATE ATTACHMENT\n  // Keep the version with the most text\n  // ---------------------------------------------------\n\n  else if (\n    currentText.length >\n    (existing.extractedText || '').length\n  ) {\n\n    existing.extractedText =\n      currentText;\n\n    existing.extractionSuccessful =\n      data.extractionSuccessful === true;\n\n    existing.needsOCR =\n      data.needsOCR === true;\n\n    existing.extractionMethod =\n      data.extractionMethod ||\n      existing.extractionMethod;\n\n    existing.validationStatus =\n      data.validationStatus ||\n      existing.validationStatus;\n\n    existing.isInvoice =\n      data.isInvoice ??\n      existing.isInvoice;\n  }\n}\n\n\n// =====================================================\n// CONVERT TO ARRAY\n// =====================================================\n\nconst attachments =\n  Array.from(\n    attachmentMap.values()\n  );\n\n\n// =====================================================\n// BUILD ATTACHMENT TEXT\n// =====================================================\n\nconst attachmentSections =\n  attachments.map(\n    (attachment, index) => {\n\n      const status =\n        attachment.extractionSuccessful\n          ? 'Text extracted successfully'\n          : attachment.needsOCR\n            ? 'OCR required'\n            : 'No usable text extracted';\n\n\n      return [\n        `ATTACHMENT ${index + 1}`,\n        `Attachment ID: ${attachment.attachmentId}`,\n        `File name: ${attachment.fileName}`,\n        `MIME type: ${attachment.mimeType || 'Unknown'}`,\n        `File type: ${attachment.fileType}`,\n        `Processing status: ${status}`,\n        `Extraction method: ${attachment.extractionMethod}`,\n        '',\n        'CONTENT:',\n        attachment.extractedText ||\n          '[No text extracted]'\n      ].join('\\n');\n\n    }\n  );\n\n\n// =====================================================\n// BUILD FINAL MESSAGE\n// =====================================================\n\nconst messageParts = [];\n\n\n// EMAIL INFORMATION\n\nmessageParts.push(\n  [\n    'EMAIL INFORMATION',\n    `Sender: ${senderAddress}`,\n    subject\n      ? `Subject: ${subject}`\n      : ''\n  ]\n  .filter(Boolean)\n  .join('\\n')\n);\n\n\n// EMAIL BODY\n\nif (body && body.trim()) {\n\n  messageParts.push(\n    `EMAIL BODY:\\n${body.trim()}`\n  );\n\n}\n\n\n// ATTACHMENTS\n\nif (attachmentSections.length > 0) {\n\n  messageParts.push(\n    `ATTACHMENTS:\\n\\n${\n      attachmentSections.join(\n        '\\n\\n========================================\\n\\n'\n      )\n    }`\n  );\n\n}\n\n\n// =====================================================\n// FINAL OUTPUT — ONE ITEM\n// =====================================================\n\nreturn [\n  {\n    json: {\n\n      message:\n        messageParts.join(\n          '\\n\\n========================================\\n\\n'\n        ),\n\n      email: {\n        sender: senderAddress,\n        subject,\n        body\n      },\n\n      attachmentCount:\n        attachments.length,\n\n      attachments\n\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3072,
+        144
+      ],
+      "id": "25934905-1dbf-4efa-b560-b8d0a9ba8c65",
+      "name": "return full message"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1I3ZtttFDxpBj5ZSSKF_qoOUCcxMJwOsBqQsWlPk28gk",
+          "mode": "list",
+          "cachedResultName": "Invoice Processing",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I3ZtttFDxpBj5ZSSKF_qoOUCcxMJwOsBqQsWlPk28gk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I3ZtttFDxpBj5ZSSKF_qoOUCcxMJwOsBqQsWlPk28gk/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Invoice ID",
+              "lookupValue": "={{ $json[\"invoice ID\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4272,
+        -32
+      ],
+      "id": "36226142-701c-491a-b332-979e8b68399b",
+      "name": "check for duplicates",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fGHL4TNtj0N7RmJ6",
+          "name": "Google Sheets account 9"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        4720,
+        96
+      ],
+      "id": "eeff6c03-3b6f-4a92-8c51-9422d0aa503d",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// ============================================================\n// 1. GET CLAUDE RESPONSE\n// ============================================================\n\nconst rawResponse = $json.content?.[0]?.text || '';\n\nif (!rawResponse.trim()) {\n  throw new Error(\"Claude returned an empty response\");\n}\n\n\n// ============================================================\n// 2. PARSE CLAUDE JSON\n// ============================================================\n\nlet data;\n\ntry {\n  // First attempt: Claude returned clean JSON\n  data = JSON.parse(rawResponse);\n} catch (error) {\n\n  // Claude sometimes wraps JSON in ```json ... ```\n  const cleaned = rawResponse\n    .replace(/^```json\\s*/i, '')\n    .replace(/^```\\s*/i, '')\n    .replace(/\\s*```$/i, '')\n    .trim();\n\n  try {\n    data = JSON.parse(cleaned);\n  } catch (error) {\n    throw new Error(\n      `Claude did not return valid JSON. Response: ${rawResponse}`\n    );\n  }\n}\n\n\n// Make sure Claude returned an object\nif (\n  typeof data !== 'object' ||\n  data === null ||\n  Array.isArray(data)\n) {\n  throw new Error(\"Claude response is not a valid JSON object\");\n}\n\n\nconst errors = [];\n\n\n// ============================================================\n// HELPERS\n// ============================================================\n\nfunction isBlank(value) {\n  return (\n    value === undefined ||\n    value === null ||\n    String(value).trim() === ''\n  );\n}\n\nfunction cleanString(value) {\n  if (isBlank(value)) return '';\n  return String(value).trim();\n}\n\n\n// ============================================================\n// IS INVOICE\n// ============================================================\n\nconst isInvoice = data[\"is_invoice\"];\n\nif (typeof isInvoice !== \"boolean\") {\n  errors.push(\"is_invoice must be true or false\");\n}\n\n\n// ============================================================\n// REQUIRED FIELDS\n// ============================================================\n\nconst vendorName = cleanString(data[\"vendor name\"]);\nconst invoiceNumber = cleanString(data[\"invoice number\"]);\nconst currency = cleanString(data[\"currency\"]).toUpperCase();\nconst invoiceDate = cleanString(data[\"invoice date\"]);\nconst dueDate = cleanString(data[\"due date\"]);\n\nif (!vendorName) {\n  errors.push(\"Missing vendor name\");\n}\n\nif (!invoiceNumber) {\n  errors.push(\"Missing invoice number\");\n}\n\nif (!currency) {\n  errors.push(\"Missing currency\");\n}\n\nif (!invoiceDate) {\n  errors.push(\"Missing invoice date\");\n}\n\n\n// ============================================================\n// EMAIL\n// ============================================================\n\nconst senderEmail = cleanString(\n  data[\"sender email\"]\n).toLowerCase();\n\nif (\n  senderEmail &&\n  !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(senderEmail)\n) {\n  errors.push(\"Invalid sender email\");\n}\n\n\n// ============================================================\n// CURRENCY\n// ============================================================\n\nif (currency && !/^[A-Z]{3}$/.test(currency)) {\n  errors.push(`Invalid currency format: ${currency}`);\n}\n\n\n// ============================================================\n// DATES\n// ============================================================\n\nfunction isValidDate(value) {\n  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) {\n    return false;\n  }\n\n  const date = new Date(`${value}T00:00:00Z`);\n\n  return (\n    !isNaN(date.getTime()) &&\n    date.toISOString().slice(0, 10) === value\n  );\n}\n\nif (invoiceDate && !isValidDate(invoiceDate)) {\n  errors.push(`Invalid invoice date: ${invoiceDate}`);\n}\n\nif (dueDate && !isValidDate(dueDate)) {\n  errors.push(`Invalid due date: ${dueDate}`);\n}\n\n\n// ============================================================\n// DATE LOGIC\n// ============================================================\n\n// A due date should normally not be before the invoice date.\n\nif (\n  invoiceDate &&\n  dueDate &&\n  isValidDate(invoiceDate) &&\n  isValidDate(dueDate)\n) {\n  const invoice = new Date(`${invoiceDate}T00:00:00Z`);\n  const due = new Date(`${dueDate}T00:00:00Z`);\n\n  if (due < invoice) {\n    errors.push(\n      `Due date (${dueDate}) is earlier than invoice date (${invoiceDate})`\n    );\n  }\n}\n\n\n// ============================================================\n// TOTAL AMOUNT\n// ============================================================\n\nlet totalAmount = data[\"total amount\"];\n\nif (typeof totalAmount === \"string\") {\n  totalAmount = totalAmount\n    .replace(/,/g, \"\")\n    .replace(/[€£$]/g, \"\")\n    .trim();\n}\n\nif (\n  totalAmount === \"\" ||\n  totalAmount === null ||\n  totalAmount === undefined\n) {\n  errors.push(\"Missing total amount\");\n} else {\n\n  totalAmount = Number(totalAmount);\n\n  if (!Number.isFinite(totalAmount)) {\n    errors.push(\"Total amount is not a valid number\");\n  } else if (totalAmount < 0) {\n    errors.push(\"Total amount cannot be negative\");\n  }\n}\n\n// ============================================================\n// INVOICE ID\n// ============================================================\n\nconst invoiceId = [\n  vendorName\n    .toLowerCase()\n    .replace(/[^a-z0-9]+/g, \"-\")\n    .replace(/^-|-$/g, \"\"),\n  totalAmount,\n  invoiceDate\n]\n  .filter(value => !isBlank(value))\n  .join(\"-\");\n\n\n\n// ============================================================\n// INVOICE DESCRIPTION\n// ============================================================\n\nconst invoiceDescription = cleanString(\n  data[\"invoice description\"]\n);\n\n\n// ============================================================\n// SOURCE TYPE\n// ============================================================\n\nconst validSourceTypes = [\n  \"pdf_attachment\",\n  \"email_body\"\n];\n\nconst sourceType = cleanString(\n  data[\"source type\"]\n);\n\nif (\n  sourceType &&\n  !validSourceTypes.includes(sourceType)\n) {\n  errors.push(`Invalid source type: ${sourceType}`);\n}\n\n\n// ============================================================\n// FILE URL\n// ============================================================\n\nconst fileUrl = cleanString(\n  data[\"file url\"]\n);\n\nif (fileUrl) {\n  try {\n    new URL(fileUrl);\n  } catch {\n    errors.push(\"Invalid file URL\");\n  }\n}\n\n\n// ============================================================\n// FINAL OUTPUT\n// ============================================================\n\nreturn [\n  {\n    json: {\n\n      // Clean invoice data\n      \"invoice ID\": invoiceId,\n      \"is_invoice\": isInvoice,\n      \"vendor name\": vendorName,\n      \"sender email\": senderEmail,\n      \"invoice number\": invoiceNumber,\n      \"invoice date\": invoiceDate,\n      \"due date\": dueDate,\n      \"total amount\": totalAmount,\n      \"currency\": currency,\n      \"invoice description\": invoiceDescription,\n      \"source type\": sourceType,\n      \"file url\": fileUrl,\n\n      // Validation\n      valid: errors.length === 0,\n\n      validation_status:\n        errors.length === 0\n          ? \"valid\"\n          : \"invalid\",\n\n      validation_errors:\n        errors.length === 0\n          ? \"\"\n          : errors.join(\"; \")\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3824,
+        0
+      ],
+      "id": "547502d1-dce4-4bb5-b203-c7022f89fc79",
+      "name": "clean data"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1I3ZtttFDxpBj5ZSSKF_qoOUCcxMJwOsBqQsWlPk28gk",
+          "mode": "list",
+          "cachedResultName": "Invoice Processing",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I3ZtttFDxpBj5ZSSKF_qoOUCcxMJwOsBqQsWlPk28gk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Invoices",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I3ZtttFDxpBj5ZSSKF_qoOUCcxMJwOsBqQsWlPk28gk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toFormat(\"HH:mm:ss dd/MM/yyyy \") }}",
+            "Vendor Name": "={{ $('invoice?').item.json['vendor name'] }}",
+            "Sender Email": "={{ $('invoice?').item.json['sender email'] }}",
+            "Invoice Number": "={{ $('invoice?').item.json['invoice number'] }}",
+            "Invoice Date": "={{ $('invoice?').item.json['invoice date'] }}",
+            "Due Date": "={{ $('invoice?').item.json['due date'] }}",
+            "Total amount": "={{ $('invoice?').item.json['total amount'] }}",
+            "Currency": "={{ $('invoice?').item.json.currency }}",
+            "Invoice description": "={{ $('invoice?').item.json['invoice description'] }}",
+            "Source Type": "={{ $('invoice?').item.json['source type'] }}",
+            "File URL": "={{ $('invoice?').item.json['source type'] }}",
+            "Warning Note": "={{ $('invoice?').item.json.validation_errors }}",
+            "Invoice ID": "={{ $('invoice?').item.json['invoice ID'] }}",
+            "Processing status": "={{ $('invoice?').item.json.validation_status }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Invoice ID",
+              "displayName": "Invoice ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Vendor Name",
+              "displayName": "Vendor Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sender Email",
+              "displayName": "Sender Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total amount",
+              "displayName": "Total amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Invoice description",
+              "displayName": "Invoice description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Source Type",
+              "displayName": "Source Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "File URL",
+              "displayName": "File URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Processing status",
+              "displayName": "Processing status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Warning Note",
+              "displayName": "Warning Note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        5104,
+        -64
+      ],
+      "id": "aecbbaa9-c1cd-410b-9a5f-13f95ff61609",
+      "name": "log invoice",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fGHL4TNtj0N7RmJ6",
+          "name": "Google Sheets account 9"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "perItem",
+        "minutesSaved": 8
+      },
+      "type": "n8n-nodes-base.timeSaved",
+      "typeVersion": 1,
+      "position": [
+        5328,
+        -48
+      ],
+      "id": "bc2c53cc-d4b9-4595-9b1b-80d3cbf60846",
+      "name": "Time Saved"
+    },
+    {
+      "parameters": {
+        "content": "## Monitoring and Filtering\n\nCaptures incoming emails and keeps only invoice-related ones",
+        "height": 400,
+        "width": 640
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -336,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "faa8467e-5299-49e5-8dd6-42650f240103",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Attachment Processing & Text Extraction\n",
+        "height": 896,
+        "width": 2628
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "7004d91b-8479-46d0-be10-15c5c31cdcda",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Information Organization\n\nAI-based information organization from the message (body + attachment)",
+        "height": 464,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3440,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "31d398bf-b3e6-4d04-8a8a-45a9e3b3d80e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Data Cleaning and Validation\n\nCleans AI output: ensure consistent format for attributes and prevents duplicates",
+        "height": 464,
+        "width": 1188
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3776,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "09551fa0-6355-443a-ae57-0573897a3a92",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Logging and Performance Tracking\n\nLogs invoice details in google sheet and calculates time saved",
+        "height": 336,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4976,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "62c9f388-8f94-4bee-b11e-234202095a74",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Get a message').item.binary }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "a737f5fe-1c49-409e-9563-513f09e5e1e4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "has attachment"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "31b6ed9c-58c2-45d9-acf7-018aa7507fde",
+                    "leftValue": "={{ $('Get a message').item.binary }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "no attachment"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        384
+      ],
+      "id": "cfb2a93c-5fb7-4c1a-a8a0-ac53c5c68431",
+      "name": "Switch"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        4256,
+        128
+      ],
+      "id": "5050d1f3-d8d8-4b38-85d6-49b5b89943c4",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4af073ae-9275-4a53-9c17-f272bb0094a6",
+              "leftValue": "={{ $json.is_invoice }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4016,
+        0
+      ],
+      "id": "c4c86bdd-79bb-498a-948f-62fe710e31b6",
+      "name": "invoice?"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "claude-haiku-4-5-20251001"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=This is the body of the email\n{{ $json.message }}"
+            }
+          ]
+        },
+        "options": {
+          "system": "# Role   \nYou are an invoice data extraction assistant.   Your job is to analyze all information provided in the message, including the email body, extracted text, and any attached PDF or image. When an attachment is present, inspect the attachment visually and use it as the primary source for invoice fields. Extract the relevant invoice information into the requested structured format.  You must be precise, conservative, and faithful to the source text.    \n\n# Task   \nAnalyze the raw invoice text provided below and identify the invoice fields requested in the output schema.  Extract information exactly as it appears in the source whenever possible.  The resulting data will be inserted into Google Sheets, so return clean, consistent, structured values.    \n\n# Instructions   \n\n1. Extract only information that is supported by the provided invoice text.   2. Do not invent, estimate, infer, or calculate information that is not explicitly available.   3. If an invoice genuinely does not contain a requested field:    - Return an empty string `\"\"` for that field, or    - Return a clearly flagged value if the field requires clarification.        Do not guess.   4. For dates:    - Return the date in `YYYY-MM-DD` format when the date is clearly identifiable.    - If the date is unavailable, return an empty string.   5. For the total amount:    - Extract the final amount the customer is expected to pay.    - Do not confuse the total with the subtotal, tax amount, discount, or individual line-item amounts.    - Return the numeric amount without the currency symbol.    - Preserve decimal precision where provided.   6. For currency:    - Identify the currency from the invoice.    - Prefer the standard currency code such as `EUR`, `USD`, or `GBP`.    - If the currency cannot be determined, return an empty string.   7. For vendor name:    - Extract the company or person issuing the invoice.    - Do not use the customer's/billed party's name.   8. For sender email:    - Use the sender's email address only if it is provided in the supplied text.    - Do not infer an email address from the vendor name or domain.   9. For invoice description:    - Provide a concise description of what the invoice is for.    - Base this only on the invoice content.    - If there are multiple line items, summarize them concisely rather than reproducing the entire invoice.   10. For source type:     - Use `pdf_attachment` when the invoice information comes from a PDF attachment.     - Use `email_body` when the invoice information comes from the email body.     - If information comes from both, use `pdf_attachment` if the PDF is the primary source of the invoice.   11. For file URL:     - Return the attachment URL only if a URL is explicitly provided in the input.     - Never fabricate or construct a URL.   12. When the same field appears multiple times, prefer the value that is clearly identified as the official invoice value.   13. If the invoice contains conflicting values, do not silently choose one. Use the most clearly labeled invoice value and flag the ambiguity where possible.   14. Do not include explanations, commentary, or additional fields outside the requested structured output.   \n\n# Example   \n\n## Input   \n```text INVOICE  Northstar Digital Solutions Keizersgracht 123 1015 CJ Amsterdam Netherlands   Invoice No: INV-2026-0047  Invoice Date: 26 August 2026 Due Date: 25 September 2026   Bill To: Acme Consulting B.V.   Description: Automation consulting – August 2026 Workflow implementation support   Subtotal: €1,975.00 VAT (21%): €414.75  Total Due: €2,389.75   Payment details: IBAN: NL00 EXMP 0123 4567 89y omit the attribute's value.   Expected output {   \"vendor name\": \"Northstar Digital Solutions\",   \"sender email\": \"\",   \"invoice number\": \"INV-2026-0047\",   \"invoice date\": \"2026-08-26\",   \"due date\": \"2026-09-25\",   \"total amount\": 2389.75,   \"currency\": \"EUR\",   \"invoice description\": \"Automation consulting and workflow implementation support\",   \"source type\": \"pdf_attachment\",   \"file reference\": \"scanned_doc.pdf\" }\n\n```text\n# OUTPUT FORMAT\n\nReturn ONLY a valid JSON object.\n\nDo NOT use markdown.\nDo NOT wrap the JSON in ```json or ``` code fences.\nDo NOT include explanations, commentary, or any text before or after the JSON.\n\nThe response MUST follow this exact structure:\n\n{\n  \"is_invoice\": true,\n  \"vendor name\": \"\",\n  \"sender email\": \"\",\n  \"invoice number\": \"\",\n  \"invoice date\": \"\",\n  \"due date\": \"\",\n  \"total amount\": 0,\n  \"currency\": \"\",\n  \"invoice description\": \"\",\n  \"source type\": \"pdf_attachment\",\n  \"file url\": \"\"\n}\n\nRules:\n- \"is_invoice\" must be true or false.\n- \"total amount\" must be a JSON number, never a string.\n- All other string fields must be strings.\n- Use \"\" when a string value is unavailable.\n- Use 0 for total amount only when the invoice is confirmed but the total cannot be determined.\n- \"source type\" must be exactly \"pdf_attachment\" or \"email_body\".\n- Do not add any additional fields."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        3472,
+        0
+      ],
+      "id": "ea13bd9d-5b14-484a-899e-c4e33a0b0d49",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "B5EYf5dd4xIGlwvt",
+          "name": "kosi anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "67dace71-25ef-4486-8d19-7e6e6791449f",
+              "leftValue": "={{ $json['Invoice ID'] }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4608,
+        -32
+      ],
+      "id": "3406cf52-0797-4d4e-b265-23f732d645dc",
+      "name": "no duplicate?"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.mimeType === 'application/pdf' }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "507f1325-4c4e-423c-b5a7-be60df99d564"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pdf"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "deb49a09-dea6-4f67-b5a7-92c8f69a96e9",
+                    "leftValue": "={{ $json.mimeType.startsWith('image/') }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bc08beca-5aa8-4f48-ac78-0e2a51326ca2",
+                    "leftValue": "={{\n  [\n    'application/vnd.ms-excel',\n    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'\n  ].includes($json.mimeType)\n}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "excel"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c8ca4d74-d748-4905-8d55-ab13f723bd6f",
+                    "leftValue": "={{   [     'application/msword',     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'   ].includes($json.mimeType) }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "word"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 0
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        976,
+        -144
+      ],
+      "id": "84cd0da3-6e7b-4175-bad8-7d947077a27b",
+      "name": "check file type"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\n\nfor (const item of $input.all()) {\n\n  if (!item.binary) continue;\n\n  for (const [key, binaryData] of Object.entries(item.binary)) {\n\n    output.push({\n      json: {\n        attachmentId: key,\n\n        fileName: binaryData.fileName || key,\n\n        mimeType: binaryData.mimeType || null,\n\n        fileType: null,\n\n        extractedText: '',\n\n        extractionSuccessful: false,\n\n        needsOCR: false,\n\n        extractionMethod: null,\n      },\n\n      binary: {\n        data: binaryData\n      }\n    });\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -96
+      ],
+      "id": "627c8768-7bc8-41c4-94fd-8c7c6bad851b",
+      "name": "split out attachments",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1I3ZtttFDxpBj5ZSSKF_qoOUCcxMJwOsBqQsWlPk28gk",
+          "mode": "list",
+          "cachedResultName": "Invoice Processing",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I3ZtttFDxpBj5ZSSKF_qoOUCcxMJwOsBqQsWlPk28gk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 226567938,
+          "mode": "list",
+          "cachedResultName": "Error logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I3ZtttFDxpBj5ZSSKF_qoOUCcxMJwOsBqQsWlPk28gk/edit#gid=226567938"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toFormat(\"MMMM dd yyyy, h:mm:ss a\") }}",
+            "Error message": "={{ $json.error }}",
+            "Error Type": "Validation Error",
+            "URL": "={{ $execution.resumeUrl }}",
+            "Workflow": "={{ $workflow.name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice",
+              "displayName": "Invoice",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Workflow",
+              "displayName": "Workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Node",
+              "displayName": "Node",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Error Type",
+              "displayName": "Error Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Error message",
+              "displayName": "Error message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1536,
+        448
+      ],
+      "id": "1d3d2b67-fb7a-4d55-a9d3-b3e5e5c570b7",
+      "name": "log error",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fGHL4TNtj0N7RmJ6",
+          "name": "Google Sheets account 9"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "rawData": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1328,
+        -32
+      ],
+      "id": "7d67364a-553d-4ac6-8b94-36167ddfd783",
+      "name": "Extract from excel",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {
+          "keepSource": "both"
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        160
+      ],
+      "id": "92a8de48-ce85-42fe-af9f-8a38fc82dcf0",
+      "name": "Extract from word"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = ($json.extractedText || '').trim();\n\nconst lowerText = text.toLowerCase();\n\n\n// --------------------------------------------------\n// Invoice signal groups\n// --------------------------------------------------\n\nconst invoiceNumberSignals = [\n  'invoice number',\n  'invoice no',\n  'invoice #',\n  'invoice:',\n  'inv-',\n  'inv '\n];\n\nconst vendorSignals = [\n  'vendor',\n  'supplier',\n  'seller',\n  'from:',\n  'billed by',\n  'bill from'\n];\n\nconst totalSignals = [\n  'total',\n  'total amount',\n  'amount due',\n  'balance due',\n  'grand total'\n];\n\nconst dateSignals = [\n  'invoice date',\n  'date:',\n  'due date',\n  'issue date'\n];\n\nconst billingSignals = [\n  'bill to',\n  'billed to',\n  'customer',\n  'client'\n];\n\n\n// --------------------------------------------------\n// Helper\n// --------------------------------------------------\n\nfunction hasSignal(signals) {\n  return signals.some(signal =>\n    lowerText.includes(signal)\n  );\n}\n\n\n// --------------------------------------------------\n// Detect fields\n// --------------------------------------------------\n\nconst hasInvoiceNumber =\n  hasSignal(invoiceNumberSignals);\n\nconst hasVendor =\n  hasSignal(vendorSignals);\n\nconst hasTotal =\n  hasSignal(totalSignals);\n\nconst hasDate =\n  hasSignal(dateSignals);\n\nconst hasBillingInformation =\n  hasSignal(billingSignals);\n\n\n// --------------------------------------------------\n// Count invoice fields\n// --------------------------------------------------\n\nconst detectedFields = [];\n\nif (hasInvoiceNumber)\n  detectedFields.push('invoiceNumber');\n\nif (hasVendor)\n  detectedFields.push('vendor');\n\nif (hasTotal)\n  detectedFields.push('total');\n\nif (hasDate)\n  detectedFields.push('date');\n\nif (hasBillingInformation)\n  detectedFields.push('billingInformation');\n\n\n// --------------------------------------------------\n// Determine whether extraction looks like an invoice\n// --------------------------------------------------\n\n// Minimum requirement:\n// At least TWO strong invoice indicators.\n//\n// Invoice number + total\n// Invoice number + vendor\n// Vendor + total\n// etc.\n\nconst invoiceSignalCount =\n  detectedFields.length;\n\nconst isInvoice =\n  invoiceSignalCount >= 2;\n\n\n// --------------------------------------------------\n// Determine whether extraction itself worked\n// --------------------------------------------------\n\nconst extractionSuccessful =\n  text.length > 0;\n\n\n// --------------------------------------------------\n// Final validation\n// --------------------------------------------------\n\nconst validInvoiceExtraction =\n  extractionSuccessful &&\n  isInvoice;\n\n\n// --------------------------------------------------\n// Return result\n// --------------------------------------------------\n\nreturn [\n  {\n    json: {\n      ...$json,\n\n      extractionSuccessful,\n\n      isInvoice,\n\n      validInvoiceExtraction,\n\n      extractedTextLength: text.length,\n\n      invoiceSignalCount,\n\n      detectedInvoiceFields: detectedFields,\n\n      validationStatus:\n        validInvoiceExtraction\n          ? 'valid_invoice'\n          : extractionSuccessful\n            ? 'not_invoice_or_insufficient_invoice_data'\n            : 'extraction_failed'\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2336,
+        0
+      ],
+      "id": "b1c9b3fc-909f-4713-ba6c-12b2bcc347f5",
+      "name": "validate text",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nif (items.length === 0) {\n  return [];\n}\n\n// GROUP ITEMS BY ATTACHMENT\n\nconst groups = {};\n\nfor (const item of items) {\n\n  const data = item.json || {};\n\n  const attachmentId =\n    data.attachmentId ||\n    data.attachmentKey ||\n    data.fileName ||\n    'unknown_attachment';\n\n  if (!groups[attachmentId]) {\n    groups[attachmentId] = [];\n  }\n\n  groups[attachmentId].push(item);\n}\n\n\n// =====================================================\n// NORMALIZE EACH ATTACHMENT\n// =====================================================\n\nconst output = [];\n\nfor (const [attachmentId, groupItems] of Object.entries(groups)) {\n\n  let fileName = null;\n  let mimeType = null;\n  let fileType = null;\n  let binary = null;\n\n  const rows = [];\n\n\n  // ===================================================\n  // COLLECT METADATA\n  // ===================================================\n\n  for (const item of groupItems) {\n\n    const data = item.json || {};\n\n    fileName =\n      fileName ||\n      data.fileName ||\n      data.filename ||\n      null;\n\n    mimeType =\n      mimeType ||\n      data.mimeType ||\n      data.mimetype ||\n      null;\n\n    fileType =\n      fileType ||\n      data.fileType ||\n      null;\n\n\n    // Preserve binary if available\n    if (!binary && item.binary) {\n      binary = item.binary;\n    }\n\n\n    rows.push(data);\n  }\n\n\n  // ===================================================\n  // DETERMINE FILE TYPE\n  // ===================================================\n\n  if (!fileType || fileType === 'unknown') {\n\n    if (mimeType === 'application/pdf') {\n\n      fileType = 'pdf';\n\n    }\n\n    else if (\n      mimeType === 'application/msword' ||\n      mimeType ===\n        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'\n    ) {\n\n      fileType = 'word';\n\n    }\n\n    else if (\n      mimeType === 'application/vnd.ms-excel' ||\n      mimeType ===\n        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||\n      mimeType === 'text/csv'\n    ) {\n\n      fileType = 'excel';\n\n    }\n\n    else if (\n      typeof mimeType === 'string' &&\n      mimeType.startsWith('image/')\n    ) {\n\n      fileType = 'image';\n\n    }\n\n    else if (mimeType === 'text/plain') {\n\n      fileType = 'text';\n\n    }\n\n    else {\n\n      fileType = 'unknown';\n\n    }\n  }\n\n\n  // ===================================================\n  // EXTRACT TEXT\n  // ===================================================\n\n  let extractedText = '';\n\n\n  // ===================================================\n  // IMAGE\n  // ===================================================\n\n  if (fileType === 'image') {\n\n    extractedText = '';\n\n  }\n\n\n  // ===================================================\n  // EXCEL\n  // ===================================================\n\n  else if (fileType === 'excel') {\n\n    const metadataFields = [\n      'attachmentId',\n      'attachmentKey',\n      'fileName',\n      'filename',\n      'mimeType',\n      'mimetype',\n      'fileType',\n      'extractedText',\n      'extractionSuccessful',\n      'needsOCR',\n      'extractionMethod'\n    ];\n\n\n    extractedText = rows\n      .map(row => {\n\n        return Object.entries(row)\n          .filter(([key, value]) => {\n\n            return (\n              !metadataFields.includes(key) &&\n              value !== null &&\n              value !== undefined &&\n              value !== ''\n            );\n\n          })\n          .map(([key, value]) => {\n\n            return String(value);\n\n          })\n          .join(' | ');\n\n      })\n      .filter(text => text.trim() !== '')\n      .join('\\n');\n\n  }\n\n\n  // ===================================================\n  // PDF / WORD / TEXT\n  // ===================================================\n\n  else {\n\n    const textParts = [];\n\n    for (const item of groupItems) {\n\n      const data = item.json || {};\n\n      const possibleText =\n        data.extractedText ||\n        data.text ||\n        data.content ||\n        '';\n\n\n      if (typeof possibleText === 'string') {\n\n        const trimmed =\n          possibleText.trim();\n\n        if (trimmed) {\n          textParts.push(trimmed);\n        }\n\n      }\n\n    }\n\n    extractedText =\n      textParts.join('\\n');\n\n  }\n\n\n  // ===================================================\n  // OCR\n  // ===================================================\n\n  const needsOCR =\n    fileType === 'image';\n\n\n  // ===================================================\n  // EXTRACTION SUCCESS\n  // ===================================================\n\n  const extractionSuccessful =\n    !needsOCR &&\n    extractedText.trim().length > 0;\n\n\n  // ===================================================\n  // EXTRACTION METHOD\n  // ===================================================\n\n  const extractionMethod =\n    needsOCR\n      ? 'pending_ocr'\n      : fileType;\n\n\n  // ===================================================\n  // STANDARDIZED OUTPUT\n  // ===================================================\n\n  const normalizedItem = {\n\n    json: {\n\n      attachmentId,\n\n      fileName,\n\n      mimeType,\n\n      fileType,\n\n      extractedText,\n\n      extractionSuccessful,\n\n      needsOCR,\n\n      extractionMethod,\n\n      originalItemCount:\n        groupItems.length\n\n    }\n\n  };\n\n\n  // Preserve binary\n  if (binary) {\n    normalizedItem.binary = binary;\n  }\n\n\n  output.push(normalizedItem);\n\n}\n\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        368
+      ],
+      "id": "43480314-76e8-4946-b8a3-c79122f12c6e",
+      "name": "normalize"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-5-20250929",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-5-20250929"
+        },
+        "text": "=You are performing OCR on an invoice image.\n\nExtract ALL readable text from the image exactly as accurately as possible.\n\nThe image belongs to this attachment:\n\nAttachment ID: \nFile name: {{ $json.fileName }}\nMIME type: {{ $json.mimeType }}\nFile type: {{ $json.fileType }}\n\nReturn ONLY valid JSON in this format:\n\n{\n  \"attachmentId\": \"{{ $json.attachmentId }}\",\n  \"fileName\": \"{{ $json.fileName }}\",\n  \"mimeType\": \"{{ $json.mimeType }}\",\n  \"fileType\": \"{{ $json.fileType }}\",\n  \"extractedText\": \"ALL TEXT FOUND IN THE IMAGE\"\n}\n\nDo not add explanations.\nDo not use markdown.\nDo not change the attachment ID or file name. ",
+        "inputType": "binary",
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        448
+      ],
+      "id": "d99cbe74-eaf6-4cbe-b35a-7e487773dd39",
+      "name": "OCR",
+      "credentials": {
+        "anthropicApi": {
+          "id": "B5EYf5dd4xIGlwvt",
+          "name": "kosi anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.needsOCR }}",
+                    "rightValue": "true",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "17b445ee-3916-4282-959d-c62ff498dcbc"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "needs OCR"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7e02213c-c1d3-4dd2-b5b0-3a1e00503bda",
+                    "leftValue": "={{ $json.needsOCR }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "no ocr"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2336,
+        368
+      ],
+      "id": "b1dd5042-ef76-4f58-8772-22f30b300a0e",
+      "name": "needs ocr?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst output = [];\n\nfor (const item of items) {\n\n  const response = item.json || {};\n\n  // =====================================================\n  // GET CLAUDE TEXT RESPONSE\n  // =====================================================\n\n  let rawText =\n    response.content?.[0]?.text || '';\n\n  if (typeof rawText !== 'string') {\n    rawText = '';\n  }\n\n  rawText = rawText.trim();\n\n\n  // =====================================================\n  // REMOVE MARKDOWN CODE FENCES\n  // =====================================================\n\n  rawText = rawText\n    .replace(/^```json\\s*/i, '')\n    .replace(/^```\\s*/i, '')\n    .replace(/\\s*```$/i, '')\n    .trim();\n\n\n  // =====================================================\n  // PARSE CLAUDE JSON\n  // =====================================================\n\n  let ocrData = {};\n\n  try {\n\n    ocrData = JSON.parse(rawText);\n\n  } catch (error) {\n\n    // If Claude returned invalid JSON,\n    // keep the raw response so it can be inspected.\n\n    ocrData = {\n      extractedText: rawText\n    };\n  }\n\n\n  // =====================================================\n  // GET VALUES\n  // =====================================================\n\n  const attachmentId =\n    ocrData.attachmentId ||\n    null;\n\n  const fileName =\n    ocrData.fileName ||\n    null;\n\n  const mimeType =\n    ocrData.mimeType ||\n    null;\n\n  const fileType =\n    ocrData.fileType ||\n    'image';\n\n  const extractedText =\n    typeof ocrData.extractedText === 'string'\n      ? ocrData.extractedText.trim()\n      : '';\n\n\n  // =====================================================\n  // STANDARDIZED OUTPUT\n  // =====================================================\n\n  output.push({\n\n    json: {\n\n      attachmentId,\n\n      fileName,\n\n      mimeType,\n\n      fileType,\n\n      extractedText,\n\n      extractionSuccessful:\n        extractedText.length > 0,\n\n      needsOCR: false,\n\n      extractionMethod:\n        'claude_vision_ocr'\n\n    },\n\n    binary: item.binary\n\n  });\n\n}\n\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2784,
+        448
+      ],
+      "id": "b943906d-69d9-48c0-955f-3bbbf4929aa2",
+      "name": "normalize ocr output"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2880,
+        256
+      ],
+      "id": "fc695674-26e7-4156-a74e-3647cec07b6f",
+      "name": "Merge",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1568,
+        96
+      ],
+      "id": "5db30d40-66c8-4267-af86-8cef2122f1e0",
+      "name": "merge info and metadata",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst invoiceKeywords = [\n  'invoice',\n  'invoice number',\n  'invoice no',\n  'invoice #',\n  'total',\n  'total due',\n  'amount due',\n  'vendor',\n  'bill to',\n  'subtotal',\n  'tax',\n  'vat',\n  'date'\n];\n\nreturn items.map(item => {\n\n  const data = item.json || {};\n\n  const text =\n    (data.extractedText || '')\n      .trim();\n\n  const lowerText =\n    text.toLowerCase();\n\n\n  // =====================================================\n  // CHECK FOR INVOICE SIGNALS\n  // =====================================================\n\n  const keywordMatches =\n    invoiceKeywords.filter(keyword =>\n      lowerText.includes(keyword)\n    );\n\n\n  // =====================================================\n  // CHECK WHETHER ENOUGH TEXT WAS EXTRACTED\n  // =====================================================\n\n  const hasEnoughText =\n    text.length >= 50;\n\n\n  // At least 2 invoice-related signals\n  const hasInvoiceSignals =\n    keywordMatches.length >= 2;\n\n\n  // =====================================================\n  // DETERMINE EXTRACTION QUALITY\n  // =====================================================\n\n  const extractionLooksUseful =\n    hasEnoughText &&\n    hasInvoiceSignals;\n\n\n  // =====================================================\n  // DETERMINE WHETHER OCR IS REQUIRED\n  // =====================================================\n\n  let needsOCR = false;\n\n  // Images always need OCR\n  if (data.fileType === 'image') {\n\n    needsOCR = true;\n\n  }\n\n  // PDFs may be scanned/image-based or poorly extracted\n  else if (data.fileType === 'pdf') {\n\n    needsOCR =\n      !extractionLooksUseful;\n\n  }\n\n  // Word documents with failed extraction\n  else if (data.fileType === 'word') {\n\n    needsOCR =\n      !extractionLooksUseful;\n\n  }\n\n  // Text files with no useful extraction\n  else if (data.fileType === 'text') {\n\n    needsOCR =\n      !extractionLooksUseful;\n\n  }\n\n  // Excel usually does not need OCR\n  else if (data.fileType === 'excel') {\n\n    needsOCR = false;\n\n  }\n\n\n  // =====================================================\n  // RETURN UPDATED ITEM\n  // =====================================================\n\n  return {\n\n    json: {\n\n      ...data,\n\n      extractionTextLength:\n        text.length,\n\n      invoiceKeywordMatches:\n        keywordMatches,\n\n      extractionLooksUseful,\n\n      needsOCR,\n\n      extractionSuccessful:\n        extractionLooksUseful\n\n    },\n\n    binary:\n      item.binary\n\n  };\n\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        32
+      ],
+      "id": "f65b13c4-c43f-4dec-b993-25e973ef6753",
+      "name": "assess extraction quality"
+    }
+  ],
+  "pinData": {
+    "Gmail Trigger": [
+      {
+        "json": {
+          "id": "1a049100e5058799",
+          "threadId": "1a049100e5058799",
+          "snippet": "Hi Accounts Team, Please find attached the documents related to our recent transactions. Kindly review and process the relevant invoice accordingly. Thank you. Best regards, Sarah Johnson Operations",
+          "payload": {
+            "mimeType": "multipart/mixed"
+          },
+          "sizeEstimate": 278053,
+          "historyId": "582449",
+          "internalDate": "1787932171000",
+          "labels": [
+            {
+              "id": "INBOX",
+              "name": "INBOX"
+            },
+            {
+              "id": "CATEGORY_PERSONAL",
+              "name": "CATEGORY_PERSONAL"
+            },
+            {
+              "id": "UNREAD",
+              "name": "UNREAD"
+            }
+          ],
+          "From": "andrea nebolisa <kosinebolisa.ai@gmail.com>",
+          "Subject": "Invoice documents for august",
+          "To": "\"nebolisako@gmail.com\" <nebolisako@gmail.com>"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter non-invoice emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter non-invoice emails": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract info from pdf": {
+      "main": [
+        [
+          {
+            "node": "normalize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "log error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "return full message": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check for duplicates": {
+      "main": [
+        [
+          {
+            "node": "no duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "clean data": {
+      "main": [
+        [
+          {
+            "node": "invoice?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "log invoice": {
+      "main": [
+        [
+          {
+            "node": "Time Saved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "split out attachments",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "return full message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "invoice?": {
+      "main": [
+        [
+          {
+            "node": "check for duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "clean data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "no duplicate?": {
+      "main": [
+        [
+          {
+            "node": "log invoice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check file type": {
+      "main": [
+        [
+          {
+            "node": "Extract info from pdf",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "normalize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract from excel",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "merge info and metadata",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Extract from word",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "split out attachments": {
+      "main": [
+        [
+          {
+            "node": "check file type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from excel": {
+      "main": [
+        [
+          {
+            "node": "merge info and metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "log error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from word": {
+      "main": [
+        [
+          {
+            "node": "normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validate text": {
+      "main": [
+        []
+      ]
+    },
+    "normalize": {
+      "main": [
+        [
+          {
+            "node": "needs ocr?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OCR": {
+      "main": [
+        [
+          {
+            "node": "normalize ocr output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "needs ocr?": {
+      "main": [
+        [
+          {
+            "node": "OCR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "normalize ocr output": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "return full message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "merge info and metadata": {
+      "main": [
+        [
+          {
+            "node": "normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "assess extraction quality": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "dynamic",
+    "errorWorkflow": "MHIsxoki66DQevbM",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "62edaa7f-ebb6-4560-b72a-184bc7229b3e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4c7399d63283ab23b038107b3d9551ef4ce9469e21819dd4d80f7395ea107ece"
+  },
+  "nodeGroups": [],
+  "id": "53lkfV7O2QpTlWXK",
+  "tags": []
+}
